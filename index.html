@@ -10,21 +10,21 @@
   :root { --noche:#1b1026; --ciruela:#3a1d45; --rosa:#f2a1b5; --oro:#f4d9a0; --crema:#fbeff0; --tinta:#3a2433; }
   * { box-sizing:border-box; margin:0; }
   html, body { min-height:100%; }
-  body { background:radial-gradient(ellipse at 50% 0%, var(--ciruela), var(--noche) 70%) fixed; color:var(--crema); font-family:'Karla',system-ui,sans-serif; overflow-x:hidden; }
+  body { background:radial-gradient(ellipse at 50% 0%, var(--ciruela), var(--noche) 70%) fixed; color:var(--crema); font-family:'Nunito',system-ui,sans-serif; overflow-x:hidden; }
   canvas#fondo { position:fixed; inset:0; width:100%; height:100%; z-index:0; }
   main { position:relative; z-index:1; max-width:760px; margin:0 auto; padding:14vh 24px 14vh; text-align:center; }
   button { font:inherit; color:inherit; }
   :focus-visible { outline:2px solid var(--oro); outline-offset:3px; }
 
-  h1 { font-family:'Fraunces',Georgia,serif; font-weight:300; font-style:italic; font-size:clamp(2.2rem,7vw,3.8rem); line-height:1.15; color:var(--oro); }
+  h1 { font-family:'Nunito',system-ui,sans-serif; font-weight:300; font-style:italic; font-size:clamp(2.2rem,7vw,3.8rem); line-height:1.15; color:var(--oro); }
   .sub { margin-top:14px; font-size:1.05rem; opacity:.8; }
 
   .contador { margin:56px 0 24px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px 12px; }
-  .unidad b { display:block; font-family:'Fraunces',Georgia,serif; font-weight:600; font-size:clamp(2.6rem,10vw,4.6rem); line-height:1; font-variant-numeric:tabular-nums; color:var(--rosa); }
+  .unidad b { display:block; font-family:'Nunito',system-ui,sans-serif; font-weight:600; font-size:clamp(2.6rem,10vw,4.6rem); line-height:1; font-variant-numeric:tabular-nums; color:var(--rosa); }
   .unidad span { display:block; margin-top:6px; font-size:.95rem; opacity:.75; }
   @media (min-width:640px) { .contador { grid-template-columns:repeat(6,1fr); gap:12px; } }
 
-  .mensaje { margin:48px auto 0; max-width:30em; font-family:'Fraunces',Georgia,serif; font-weight:300; font-size:1.25rem; line-height:1.6; }
+  .mensaje { margin:48px auto 0; max-width:30em; font-family:'Nunito',system-ui,sans-serif; font-weight:300; font-size:1.25rem; line-height:1.6; }
 
   /* Sobre */
   .sobre-wrap { margin-top:72px; }
@@ -61,7 +61,7 @@
 
   .papel { width:min(520px,100%); max-height:86vh; overflow-y:auto; background:var(--crema); color:var(--tinta); padding:40px 34px; border-radius:3px; text-align:left; box-shadow:0 20px 50px rgba(0,0,0,.6); }
   .papel h2 { font-family:'Caveat',cursive; font-weight:500; font-size:2.2rem; margin-bottom:18px; }
-  .papel p { font-family:'Fraunces',Georgia,serif; font-weight:300; font-size:1.1rem; line-height:1.7; margin-bottom:14px; }
+  .papel p { font-family:'Nunito',system-ui,sans-serif; font-weight:300; font-size:1.1rem; line-height:1.7; margin-bottom:14px; }
   .papel .firma { font-family:'Caveat',cursive; font-size:1.9rem; margin-top:22px; text-align:right; }
 
   .grande { background:var(--crema); padding:14px 14px 0; border-radius:3px; box-shadow:0 20px 50px rgba(0,0,0,.6); max-width:min(560px,92vw); }
