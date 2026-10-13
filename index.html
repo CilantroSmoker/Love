@@ -83,7 +83,7 @@
   .nav.ant { left:12px; } .nav.sig { right:12px; }
   .nav.oculto { display:none; }
 
-  /* Reproductor ARRIBA a la derecha y limpio al colapsar */
+  /* Reproductor Arriba a la derecha */
   #reproductor { position:fixed; right:12px; top:12px; z-index:10; display:flex; flex-direction:column; gap:6px; max-width:calc(100vw - 24px); width: 280px; padding:10px 12px; border-radius:14px; border:1px solid rgba(251,239,240,.35); background:rgba(27,16,38,0.9); backdrop-filter:blur(8px); font-size:.85rem; box-shadow: 0 10px 25px rgba(0,0,0,.5); transition:all .3s ease; }
   #reproductor[hidden] { display:none; }
   
@@ -104,6 +104,11 @@
   
   .m-barra-wrap { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 0.75rem; opacity: 0.8; }
   #m-progreso { flex: 1; accent-color: var(--rosa); height: 4px; cursor: pointer; }
+
+  /* Notificación bajada a top: 110px para que quede debajo del reproductor expandido */
+  #toast-musica { position: fixed; top: 110px; right: 12px; z-index: 30; background: rgba(58, 29, 69, 0.95); border: 1px solid var(--rosa); padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.4s ease; backdrop-filter: blur(6px); color: var(--crema); pointer-events: none; }
+  #toast-musica.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
+  #toast-musica span { color: var(--oro); font-weight: 600; }
   
   .corazon { position:fixed; z-index:5; pointer-events:none; font-size:22px; color:var(--rosa); animation:sube 1.6s ease-out forwards; }
   @keyframes sube { from { opacity:1; transform:translate(-50%,-50%) scale(.6); } to { opacity:0; transform:translate(-50%,-260%) scale(1.4); } }
@@ -144,7 +149,7 @@
   <p class="pista">Toca cualquier parte de la pantalla 💗</p>
 </main>
 
-<!-- Reproductor empieza colapsado (guardado) por defecto -->
+<!-- Reproductor arriba a la derecha -->
 <div id="reproductor" class="colapsado" hidden>
   <div class="m-fila-superior">
     <span id="m-titulo"></span>
@@ -162,6 +167,11 @@
       <span id="m-tiempo-total">0:00</span>
     </div>
   </div>
+</div>
+
+<!-- Notificación emergente más abajo -->
+<div id="toast-musica">
+  🎵 Estás escuchando: <span id="toast-titulo"></span>
 </div>
 
 <div class="overlay" id="carta" role="dialog" aria-modal="true" aria-label="Carta">
@@ -197,7 +207,7 @@ const CONFIG = {
   ],
   hitos: [
     { fecha: "26 de diciembre, 2019", titulo: "El día que empezó todo", desc: "El momento exacto en que nuestras vidas se cruzaron." },
-    { fecha: "23 de febrero, 2022", titulo: "Cuando se confesó", desc: "Recuerdo ese dia con mucho cariño, porque me dijo que yo le gustaba." },
+    { fecha: "23 de febrero, 2022", titulo: "Когда se confesó", desc: "Recuerdo ese dia con mucho cariño, porque me dijo que yo le gustaba." },
     { fecha: "04 de agosto, 2022", titulo: "El dia que nos vimos", desc: "Fue el dia que nos vimos por primera vez, cuando la fui a buscar a su liceo" },
     { fecha: "05 de agosto, 2022", titulo: "La propuesta", desc: "El dia que me armé de valor y le pedi que fuera mi polola." },
     { fecha: "Actualidad", titulo: "Pasan los dias", desc: "Los dias pasan, pero cuando la veo, me siento como el niño que se enamoró de usted." }
@@ -261,7 +271,20 @@ if (CONFIG.hitos && CONFIG.hitos.length > 0) {
   $('seccion-hitos').style.display = 'none';
 }
 
-/* ---- Reproductor Avanzado Arriba ---- */
+/* ---- Notificación flotante de música ---- */
+let toastTimeout = null;
+function mostrarToastCancion(tituloCancion) {
+  const toast = $('toast-musica');
+  $('toast-titulo').textContent = tituloCancion;
+  toast.classList.add('mostrar');
+  
+  if (toastTimeout) clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('mostrar');
+  }, 4000);
+}
+
+/* ---- Reproductor Avanzado ---- */
 let audio = null, quiere = false, idx = 0;
 let sirve = [].concat(CONFIG.musica || []).map(c => typeof c === 'string' ? { src: c, titulo: '' } : c);
 
@@ -276,16 +299,25 @@ function cargar(i, sonar) {
   if (!sirve.length) { $('reproductor').hidden = true; return; }
   idx = (i + sirve.length) % sirve.length;
   audio.src = sirve[idx].src;
-  $('m-titulo').textContent = sirve[idx].titulo || 'Canción ' + (idx + 1);
+  const tituloActual = sirve[idx].titulo || 'Canción ' + (idx + 1);
+  $('m-titulo').textContent = tituloActual;
   $('m-ant').hidden = $('m-sig').hidden = sirve.length < 2;
   $('m-progreso').value = 0;
   $('m-tiempo-actual').textContent = "0:00";
   $('m-tiempo-total').textContent = "0:00";
-  if (sonar) audio.play().catch(() => {});
+  
+  if (sonar) {
+    audio.play().catch(() => {});
+    mostrarToastCancion(tituloActual);
+  }
 }
 
 function iniciarMusica() {
-  if (audio && audio.paused) { quiere = true; audio.play().catch(() => {}); }
+  if (audio && audio.paused) { 
+    quiere = true; 
+    audio.play().catch(() => {}); 
+    mostrarToastCancion(sirve[idx].titulo || 'Canción ' + (idx + 1));
+  }
 }
 
 if (sirve.length) {
@@ -315,11 +347,25 @@ if (sirve.length) {
   });
 
   $('m-play').addEventListener('click', () => {
-    if (audio.paused) { quiere = true; audio.play().catch(() => {}); }
-    else { quiere = false; audio.pause(); }
+    if (audio.paused) { 
+      quiere = true; 
+      audio.play().catch(() => {}); 
+      mostrarToastCancion(sirve[idx].titulo || 'Canción ' + (idx + 1));
+    } else { 
+      quiere = false; 
+      audio.pause(); 
+    }
   });
-  $('m-sig').addEventListener('click', () => { quiere = true; cargar(idx + 1, true); });
-  $('m-ant').addEventListener('click', () => { quiere = true; cargar(idx - 1, true); });
+  
+  $('m-sig').addEventListener('click', () => { 
+    quiere = true; 
+    cargar(idx + 1, true); 
+  });
+  
+  $('m-ant').addEventListener('click', () => { 
+    quiere = true; 
+    cargar(idx - 1, true); 
+  });
 
   $('m-progreso').addEventListener('input', e => {
     if (audio.duration) {
