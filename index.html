@@ -62,8 +62,10 @@
   .polaroid:hover { transform:rotate(0) scale(1.04); }
 
   .pista { margin-top:64px; font-size:.85rem; opacity:.5; }
+  .pista span { color: var(--rosa); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+  .pista span:hover { color: var(--oro); }
 
-  /* Ventanas (carta y foto grande) */
+  /* Ventanas (carta, foto grande y juego) */
   .overlay { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(10,5,15,.88); opacity:0; visibility:hidden; transition:opacity .35s, visibility .35s; }
   .overlay.visible { opacity:1; visibility:visible; }
   .overlay .contenido { transform:translateY(24px) scale(.96); transition:transform .45s ease; }
@@ -82,6 +84,19 @@
   .nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(27,16,38,.6); border:1px solid rgba(251,239,240,.3); border-radius:50%; width:46px; height:46px; font-size:2rem; line-height:1; cursor:pointer; z-index:1; }
   .nav.ant { left:12px; } .nav.sig { right:12px; }
   .nav.oculto { display:none; }
+
+  /* Estilos del Minijuego "Atrapa el Corazón" */
+  .juego-card { background:var(--crema); color:var(--tinta); width:min(420px, 92vw); height:440px; border-radius:12px; padding:20px; display:flex; flex-direction:column; position:relative; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; }
+  .juego-header { display:flex; justify-content:space-between; align-items:center; font-family:'Caveat',cursive; font-size:1.6rem; margin-bottom:10px; z-index:2; }
+  .juego-area { flex:1; background:rgba(58,29,69,0.06); border:2px dashed rgba(58,29,69,0.2); border-radius:8px; position:relative; overflow:hidden; cursor:crosshair; }
+  .corazon-item { position:absolute; font-size:32px; cursor:pointer; user-select:none; animation: caer linear forwards; transform:translate(-50%, -50%); transition: transform 0.1s; }
+  .corazon-item:active { transform:scale(1.3); }
+  @keyframes caer { from { top:-40px; } to { top:105%; } }
+  .juego-pantalla-final { position:absolute; inset:0; background:var(--crema); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; z-index:5; }
+  .juego-pantalla-final h3 { font-family:'Caveat',cursive; font-size:2.4rem; color:var(--ciruela); margin-bottom:10px; }
+  .juego-pantalla-final p { font-family:'Nunito',system-ui,sans-serif; font-size:1.1rem; line-height:1.5; margin-bottom:20px; }
+  .btn-juego { background:var(--ciruela); color:var(--crema); border:0; padding:10px 24px; border-radius:8px; font-family:'Nunito',system-ui,sans-serif; font-weight:600; cursor:pointer; transition:transform .2s; }
+  .btn-juego:hover { transform:scale(1.05); }
 
   /* Reproductor Arriba a la derecha */
   #reproductor { position:fixed; right:12px; top:12px; z-index:10; display:flex; flex-direction:column; gap:6px; max-width:calc(100vw - 24px); width: 280px; padding:10px 12px; border-radius:14px; border:1px solid rgba(251,239,240,.35); background:rgba(27,16,38,0.9); backdrop-filter:blur(8px); font-size:.85rem; box-shadow: 0 10px 25px rgba(0,0,0,.5); transition:all .3s ease; }
@@ -105,7 +120,7 @@
   .m-barra-wrap { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 0.75rem; opacity: 0.8; }
   #m-progreso { flex: 1; accent-color: var(--rosa); height: 4px; cursor: pointer; }
 
-  /* Notificación bajada a top: 110px para que quede debajo del reproductor expandido */
+  /* Notificación debajo del reproductor */
   #toast-musica { position: fixed; top: 110px; right: 12px; z-index: 30; background: rgba(58, 29, 69, 0.95); border: 1px solid var(--rosa); padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.4s ease; backdrop-filter: blur(6px); color: var(--crema); pointer-events: none; }
   #toast-musica.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
   #toast-musica span { color: var(--oro); font-weight: 600; }
@@ -146,7 +161,7 @@
   </section>
 
   <section class="fotos" id="fotos"></section>
-  <p class="pista">Toca cualquier parte de la pantalla 💗</p>
+  <p class="pista">Toca cualquier parte de la pantalla o <span id="btn-juego-abrir">juega un ratito aquí 💖</span></p>
 </main>
 
 <!-- Reproductor arriba a la derecha -->
@@ -169,7 +184,7 @@
   </div>
 </div>
 
-<!-- Notificación emergente más abajo -->
+<!-- Notificación emergente -->
 <div id="toast-musica">
   🎵 Estás escuchando: <span id="toast-titulo"></span>
 </div>
@@ -184,6 +199,23 @@
   <button class="nav ant" id="ant" aria-label="Foto anterior">‹</button>
   <figure class="contenido grande"><img id="visor-img" alt=""><figcaption id="visor-txt"></figcaption></figure>
   <button class="nav sig" id="sig" aria-label="Foto siguiente">›</button>
+</div>
+
+<!-- Ventana Modal del Minijuego -->
+<div class="overlay" id="modal-juego" role="dialog" aria-modal="true" aria-label="Juego Atrapa el Corazón">
+  <button class="cerrar" id="cerrar-juego" aria-label="Cerrar">×</button>
+  <div class="contenido juego-card">
+    <div class="juego-header">
+      <span>Atrapa 10 corazones 💖</span>
+      <span>Atrapados: <strong id="score">0</strong>/10</span>
+    </div>
+    <div class="juego-area" id="juego-area"></div>
+    <div class="juego-pantalla-final" id="pantalla-final" style="display:none;">
+      <h3>Felicidades 🎉🎉</h3>
+      <p>ha completado mi pequeño minijuego, si quieres puede volver a jugar</p>
+      <button class="btn-juego" id="btn-reiniciar">Jugar otra vez</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -207,8 +239,8 @@ const CONFIG = {
   ],
   hitos: [
     { fecha: "26 de diciembre, 2019", titulo: "El día que empezó todo", desc: "El momento exacto en que nuestras vidas se cruzaron." },
-    { fecha: "23 de febrero, 2022", titulo: "Когда se confesó", desc: "Recuerdo ese dia con mucho cariño, porque me dijo que yo le gustaba." },
-    { fecha: "04 de agosto, 2022", titulo: "El dia que nos vimos", desc: "Fue el dia que nos vimos por primera vez, cuando la fui a buscar a su liceo" },
+    { fecha: "23 de febrero, 2022", titulo: "Cuando se confesó", desc: "Recuerdo ese dia con mucho cariño, porque me dijo que yo le gustaba." },
+    { fecha: "04 de agosto, 2022", titulo: "El dia que nos vimos", desc: "Fue el dia que nos vimos por primera vez, когда la fui a buscar a su liceo" },
     { fecha: "05 de agosto, 2022", titulo: "La propuesta", desc: "El dia que me armé de valor y le pedi que fuera mi polola." },
     { fecha: "Actualidad", titulo: "Pasan los dias", desc: "Los dias pasan, pero cuando la veo, me siento como el niño que se enamoró de usted." }
   ],
@@ -237,8 +269,10 @@ function actualizar() {
   let m = ahora.getMonth() - ini.getMonth();
   let d = ahora.getDate() - ini.getDate();
   let h = ahora.getHours() - ini.getHours();
-  let mi = ahora.getMinutes() - ini.getMinutes();
+  let mi = now = ahora.getMinutes() - ini.getMinutes();
   let s = ahora.getSeconds() - ini.getSeconds();
+  // Corregido cálculo de minutos
+  mi = ahora.getMinutes() - ini.getMinutes();
   if (s < 0)  { s += 60; mi--; }
   if (mi < 0) { mi += 60; h--; }
   if (h < 0)  { h += 24; d--; }
@@ -249,10 +283,11 @@ function actualizar() {
 }
 actualizar(); setInterval(actualizar, 1000);
 
-const overlays = [$('carta'), $('visor')];
+const overlays = [$('carta'), $('visor'), $('modal-juego')];
 function cerrarTodo() {
   overlays.forEach(o => o.classList.remove('visible'));
   $('sobre').classList.remove('abierto');
+  detenerJuego();
 }
 overlays.forEach(o => {
   o.addEventListener('click', e => { if (e.target === o || e.target.classList.contains('cerrar')) cerrarTodo(); });
@@ -270,6 +305,77 @@ if (CONFIG.hitos && CONFIG.hitos.length > 0) {
 } else {
   $('seccion-hitos').style.display = 'none';
 }
+
+/* ---- Lógica del Minijuego Atrapa el Corazón ---- */
+let score = 0, juegoInterval = null, juegoActivo = false;
+
+function iniciarJuego() {
+  score = 0;
+  $('score').textContent = score;
+  $('pantalla-final').style.display = 'none';
+  $('juego-area').innerHTML = '';
+  juegoActivo = true;
+
+  if (juegoInterval) clearInterval(juegoInterval);
+  juegoInterval = setInterval(() => {
+    if (!juegoActivo) return;
+    const area = $('juego-area');
+    const corazon = document.createElement('div');
+    corazon.className = 'corazon-item';
+    corazon.textContent = '💖';
+    
+    // Posición horizontal aleatoria dentro del área
+    const maxX = area.clientWidth - 40;
+    const randomX = Math.max(20, Math.floor(Math.random() * maxX));
+    corazon.style.left = randomX + 'px';
+    
+    // Velocidad de caída aleatoria entre 2s y 3.5s
+    const duracion = 2 + Math.random() * 1.5;
+    corazon.style.animationDuration = duracion + 's';
+
+    corazon.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      if (!juegoActivo) return;
+      score++;
+      $('score').textContent = score;
+      corazon.remove();
+      if (score >= 10) {
+        finalizarJuego();
+      }
+    });
+
+    // Remover al terminar animación si no lo atrapó
+    corazon.addEventListener('animationend', () => {
+      corazon.remove();
+    });
+
+    area.appendChild(corazon);
+  }, 700);
+}
+
+function detenerJuego() {
+  juegoActivo = false;
+  if (juegoInterval) clearInterval(juegoInterval);
+}
+
+function finalizarJuego() {
+  detenerJuego();
+  $('pantalla-final').style.display = 'flex';
+}
+
+$('btn-juego-abrir').addEventListener('click', () => {
+  $('modal-juego').classList.add('visible');
+  iniciarJuego();
+});
+
+$('btn-reiniciar').addEventListener('click', () => {
+  iniciarJuego();
+});
+
+$('cerrar-juego').addEventListener('click', () => {
+  cerrarTodo();
+});
+
 
 /* ---- Notificación flotante de música ---- */
 let toastTimeout = null;
