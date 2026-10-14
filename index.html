@@ -77,9 +77,21 @@
   .papel p { font-family:'Nunito',system-ui,sans-serif; font-weight:300; font-size:1.1rem; line-height:1.7; margin-bottom:14px; }
   .papel .firma { font-family:'Caveat',cursive; font-size:1.9rem; margin-top:22px; text-align:right; }
 
-  .grande { background:var(--crema); padding:14px 14px 0; border-radius:3px; box-shadow:0 20px 50px rgba(0,0,0,.6); max-width:min(560px,92vw); }
+  .grande { background:var(--crema); padding:14px 14px 0; border-radius:3px; box-shadow:0 20px 50px rgba(0,0,0,.6); max-width:min(560px,92vw); position: relative; }
   .grande img { display:block; max-width:100%; max-height:68vh; margin:0 auto; }
   .grande figcaption { min-height:64px; padding:12px 8px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--tinta); font-family:'Caveat',cursive; font-size:1.7rem; line-height:1.2; }
+
+  /* Flechas de navegación del visor */
+  .nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(58,29,69,0.85); color:var(--crema); border:1px solid rgba(242,161,181,0.4); border-radius:50%; width:44px; height:44px; font-size:1.8rem; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:background 0.2s, transform 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+  .nav:hover { background:var(--ciruela); color:var(--oro); transform:translateY(-50%) scale(1.1); }
+  .nav.ant { left:-56px; } 
+  .nav.sig { right:-56px; }
+  .nav.oculto { display:none; }
+
+  @media (max-width: 640px) {
+    .nav.ant { left: 8px; background: rgba(27,16,38,0.8); }
+    .nav.sig { right: 8px; background: rgba(27,16,38,0.8); }
+  }
 
   /* Estilos del Minijuego Atrapa el Corazón */
   .juego-card { background:var(--crema); color:var(--tinta); width:min(420px, 92vw); height:440px; border-radius:12px; padding:20px; display:flex; flex-direction:column; position:relative; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; }
@@ -126,11 +138,15 @@
   .m-fila-superior { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
   .m-contenido-expandido { display: flex; flex-direction: column; gap: 6px; width: 100%; }
   
-  #reproductor button { background:none; border:0; cursor:pointer; padding:4px 6px; font-size:1rem; line-height:1; color: var(--crema); }
+  #reproductor button { background:none; border:0; cursor:pointer; padding:4px 6px; font-size:1rem; line-height:1; color: var(--crema); display: flex; align-items: center; justify-content: center; }
   #reproductor button:hover { color: var(--rosa); }
-  #m-titulo { max-width:140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.9; font-weight: 600; }
+  #m-titulo { max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.9; font-weight: 600; }
   
   .m-controles-centro { display: flex; align-items: center; justify-content: center; gap: 8px; }
+  
+  #m-shuffle { opacity: 0.45; transition: opacity 0.2s, color 0.2s; }
+  #m-shuffle svg { width: 18px; height: 18px; fill: currentColor; }
+  #m-shuffle.activo { opacity: 1; color: var(--oro); filter: drop-shadow(0 0 4px rgba(244,217,160,0.6)); }
   
   .m-barra-wrap { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 0.75rem; opacity: 0.8; }
   #m-progreso { flex: 1; accent-color: var(--rosa); height: 4px; cursor: pointer; }
@@ -190,6 +206,9 @@
   </div>
   <div class="m-contenido-expandido">
     <div class="m-controles-centro">
+      <button id="m-shuffle" title="Modo aleatorio" aria-label="Modo aleatorio">
+        <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+      </button>
       <button id="m-ant" aria-label="Canción anterior">⏮</button>
       <button id="m-play" aria-label="Reproducir o pausar" style="font-size: 1.2rem;">▶</button>
       <button id="m-sig" aria-label="Canción siguiente">⏭</button>
@@ -240,7 +259,7 @@
 <div class="overlay" id="modal-fotomaton" role="dialog" aria-modal="true" aria-label="Fotomatón de Accesorios">
   <button class="cerrar" id="cerrar-fotomaton" aria-label="Cerrar">×</button>
   <div class="contenido fotomaton-card">
-    <h3>Fotomatón de Amor ✨</h3>
+    <h3>Fotomatón de Amor 👓🎩</h3>
     <p>¡Elige una foto, ponte accesorios y arrástralos!</p>
     
     <div class="selector-foto-wrap">
@@ -253,7 +272,9 @@
     </div>
 
     <div class="bandeja-accesorios">
+      <div class="item-accesorio" data-val="🕶️">🕶️</div>
       <div class="item-accesorio" data-val="🎩">🎩</div>
+      <div class="item-accesorio" data-val="🥸">🥸</div>
       <div class="item-accesorio" data-val="👑">👑</div>
       <div class="item-accesorio" data-val="💖">💖</div>
       <div class="item-accesorio" data-val="💋">💋</div>
@@ -430,7 +451,6 @@ const lienzo = $('lienzo-foto');
 const selectFoto = $('select-foto-edit');
 const fotoEditable = $('foto-editable');
 
-// Poblar el menú desplegable con las fotos de CONFIG
 function inicializarSelectorFotos() {
   selectFoto.innerHTML = '';
   CONFIG.fotos.forEach((f, idx) => {
@@ -446,7 +466,6 @@ function inicializarSelectorFotos() {
 inicializarSelectorFotos();
 
 selectFoto.addEventListener('change', () => {
-  // Cambiar imagen y limpiar accesorios puestos al cambiar de foto
   fotoEditable.src = selectFoto.value;
   document.querySelectorAll('.accesorio-puesto').forEach(el => el.remove());
 });
@@ -528,15 +547,48 @@ function mostrarToastCancion(tituloCancion) {
   }, 4000);
 }
 
-/* ---- Reproductor Avanzado ---- */
-let audio = null, quiere = false, idx = 0;
+/* ---- Reproductor Inteligente con Shuffle Real ---- */
+let audio = null, quiere = false, idx = 0, esAleatorio = false;
 let sirve = [].concat(CONFIG.musica || []).map(c => typeof c === 'string' ? { src: c, titulo: '' } : c);
+let colaAleatoria = [];
 
 function formatearTiempo(segundos) {
   if (isNaN(segundos)) return "0:00";
   const m = Math.floor(segundos / 60);
   const s = Math.floor(segundos % 60);
   return m + ":" + (s < 10 ? "0" : "") + s;
+}
+
+function generarColaAleatoria() {
+  colaAleatoria = Array.from({ length: sirve.length }, (_, i) => i);
+  for (let i = colaAleatoria.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [colaAleatoria[i], colaAleatoria[j]] = [colaAleatoria[j], colaAleatoria[i]];
+  }
+  const posActual = colaAleatoria.indexOf(idx);
+  if (posActual !== -1 && colaAleatoria.length > 1 && colaAleatoria[0] === idx) {
+    [colaAleatoria[0], colaAleatoria[1]] = [colaAleatoria[1], colaAleatoria[0]];
+  }
+}
+
+function obtenerSiguienteIndice() {
+  if (sirve.length <= 1) return 0;
+  if (esAleatorio) {
+    if (colaAleatoria.length === 0) generarColaAleatoria();
+    return colaAleatoria.shift();
+  } else {
+    return (idx + 1) % sirve.length;
+  }
+}
+
+function obtenerAnteriorIndice() {
+  if (sirve.length <= 1) return 0;
+  if (esAleatorio) {
+    if (colaAleatoria.length === 0) generarColaAleatoria();
+    return colaAleatoria.shift();
+  } else {
+    return (idx - 1 + sirve.length) % sirve.length;
+  }
 }
 
 function cargar(i, sonar) {
@@ -582,7 +634,7 @@ if (sirve.length) {
 
   audio.addEventListener('play', () => { $('m-play').textContent = '❚❚'; });
   audio.addEventListener('pause', () => { $('m-play').textContent = '▶'; });
-  audio.addEventListener('ended', () => cargar(idx + 1, true));
+  audio.addEventListener('ended', () => cargar(obtenerSiguienteIndice(), true));
   
   audio.addEventListener('error', () => { 
     const rota = sirve[idx];
@@ -603,18 +655,22 @@ if (sirve.length) {
   
   $('m-sig').addEventListener('click', () => { 
     quiere = true; 
-    cargar(idx + 1, true); 
+    cargar(obtenerSiguienteIndice(), true); 
   });
   
   $('m-ant').addEventListener('click', () => { 
     quiere = true; 
-    cargar(idx - 1, true); 
+    cargar(obtenerAnteriorIndice(), true); 
+  });
+
+  $('m-shuffle').addEventListener('click', () => {
+    esAleatorio = !esAleatorio;
+    $('m-shuffle').classList.toggle('activo', esAleatorio);
+    if (esAleatorio) generarColaAleatoria();
   });
 
   $('m-progreso').addEventListener('input', e => {
-    if (audio.duration) {
-      audio.currentTime = e.target.value;
-    }
+    if (audio.duration) audio.currentTime = e.target.value;
   });
 
   $('m-btn-toggle').addEventListener('click', () => {
