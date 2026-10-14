@@ -94,19 +94,23 @@
   .btn-juego { background:var(--ciruela); color:var(--crema); border:0; padding:10px 24px; border-radius:8px; font-family:'Nunito',system-ui,sans-serif; font-weight:600; cursor:pointer; transition:transform .2s; }
   .btn-juego:hover { transform:scale(1.05); }
 
-  /* Estilos corregidos del Fotomatón (Foto completa sin cortes) */
-  .fotomaton-card { background:var(--crema); color:var(--tinta); width:min(460px, 94vw); border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; max-height: 90vh; overflow-y: auto; }
-  .fotomaton-card h3 { font-family:'Caveat',cursive; font-size:2rem; margin-bottom: 6px; color: var(--ciruela); }
-  .fotomaton-card p { font-size: 0.85rem; margin-bottom: 10px; opacity: 0.8; }
+  /* Estilos del Fotomatón con Selector de Fotos */
+  .fotomaton-card { background:var(--crema); color:var(--tinta); width:min(460px, 94vw); border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; max-height: 92vh; overflow-y: auto; }
+  .fotomaton-card h3 { font-family:'Caveat',cursive; font-size:2rem; margin-bottom: 4px; color: var(--ciruela); }
+  .fotomaton-card p { font-size: 0.85rem; margin-bottom: 8px; opacity: 0.8; }
   
+  .selector-foto-wrap { width: 100%; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
+  .selector-foto-wrap label { font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
+  .selector-foto-wrap select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(58,29,69,0.3); background: #fff; font-family: inherit; font-size: 0.9rem; color: var(--tinta); cursor: pointer; }
+
   .lienzo-foto { position: relative; width: 100%; background: #1b1026; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; user-select: none; }
-  .lienzo-foto img { width: 100%; height: auto; max-height: 55vh; object-fit: contain; display: block; margin: 0 auto; }
+  .lienzo-foto img { width: 100%; height: auto; max-height: 48vh; object-fit: contain; display: block; margin: 0 auto; }
   
   .accesorio-puesto { position: absolute; font-size: 40px; cursor: grab; user-select: none; touch-action: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); z-index: 5; }
   .accesorio-puesto:active { cursor: grabbing; }
 
-  .bandeja-accesorios { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center; background: rgba(58,29,69,0.06); padding: 10px; border-radius: 8px; width: 100%; }
-  .item-accesorio { font-size: 28px; cursor: pointer; background: #fff; border: 1px solid rgba(58,29,69,0.2); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .bandeja-accesorios { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; background: rgba(58,29,69,0.06); padding: 8px; border-radius: 8px; width: 100%; }
+  .item-accesorio { font-size: 26px; cursor: pointer; background: #fff; border: 1px solid rgba(58,29,69,0.2); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   .item-accesorio:hover { transform: scale(1.15); background: #fde8ed; }
 
   /* Reproductor Arriba a la derecha */
@@ -174,7 +178,7 @@
   <section class="fotos" id="fotos"></section>
   <p class="pista">
     Toca cualquier parte de la pantalla<br>
-    💗 <span id="btn-juego-abrir">Jugar a atrapar corazones</span> | 👓 <span id="btn-foto-abrir">Poner accesorios a nuestra foto</span>
+    💗 <span id="btn-juego-abrir">Jugar a atrapar corazones</span> | 👓 <span id="btn-foto-abrir">Poner accesorios a nuestras fotos</span>
   </p>
 </main>
 
@@ -232,21 +236,25 @@
   </div>
 </div>
 
-<!-- Ventana Modal del Fotomatón de Accesorios (Usa fotos/2.jpeg completa) -->
+<!-- Ventana Modal del Fotomatón con Selector de Fotos -->
 <div class="overlay" id="modal-fotomaton" role="dialog" aria-modal="true" aria-label="Fotomatón de Accesorios">
   <button class="cerrar" id="cerrar-fotomaton" aria-label="Cerrar">×</button>
   <div class="contenido fotomaton-card">
-    <h3>Fotomatón de Amor 👓🎩</h3>
-    <p>¡Toca un accesorio para agregarlo y arrastralo donde quieras!</p>
+    <h3>Fotomatón de Amor ✨</h3>
+    <p>¡Elige una foto, ponte accesorios y arrástralos!</p>
     
+    <div class="selector-foto-wrap">
+      <label for="select-foto-edit">Elige qué foto editar:</label>
+      <select id="select-foto-edit"></select>
+    </div>
+
     <div class="lienzo-foto" id="lienzo-foto">
-      <img src="fotos/2.jpeg" alt="Nuestra foto" id="foto-editable">
+      <img src="" alt="Foto seleccionada" id="foto-editable">
     </div>
 
     <div class="bandeja-accesorios">
-      <div class="item-accesorio" data-val="🤙">🤙</div>
       <div class="item-accesorio" data-val="🎩">🎩</div>
-      <div class="item-accesorio" data-val="🙏">🙏</div>
+      <div class="item-accesorio" data-val="🥸">🥸</div>
       <div class="item-accesorio" data-val="👑">👑</div>
       <div class="item-accesorio" data-val="💖">💖</div>
       <div class="item-accesorio" data-val="💋">💋</div>
@@ -254,10 +262,10 @@
       <div class="item-accesorio" data-val="✨">✨</div>
       <div class="item-accesorio" data-val="🥵​">🥵​</div>
       <div class="item-accesorio" data-val="🙀​">🙀​</div>
-      <div class="item-accesorio" data-val="💢​">💢​​</div>
-      <div class="item-accesorio" data-val="👅​">👅​</div>
-      <div class="item-accesorio" data-val="🎀​">🎀​</div>
-      <div class="item-accesorio" data-val="">🎀​</div>
+      <div class="item-accesorio" data-val="💢​">💢</div>
+      <div class="item-accesorio" data-val="👅​">👅</div>
+      <div class="item-accesorio" data-val="🎀​">🎀</div>
+      <div class="item-accesorio" data-val="〰️">〰️</div>
     </div>
     
     <button class="btn-juego" id="btn-limpiar-accesorios" style="margin-top: 10px;">Limpiar accesorios</button>
@@ -418,8 +426,31 @@ $('cerrar-juego').addEventListener('click', () => {
 });
 
 
-/* ---- Lógica del Fotomatón de Accesorios (2.jpeg) ---- */
+/* ---- Lógica del Fotomatón con Selector de Fotos ---- */
 const lienzo = $('lienzo-foto');
+const selectFoto = $('select-foto-edit');
+const fotoEditable = $('foto-editable');
+
+// Poblar el menú desplegable con las fotos de CONFIG
+function inicializarSelectorFotos() {
+  selectFoto.innerHTML = '';
+  CONFIG.fotos.forEach((f, idx) => {
+    const opt = document.createElement('option');
+    opt.value = f.src;
+    opt.textContent = (f.texto ? f.texto : ('Foto ' + (idx + 1)));
+    selectFoto.appendChild(opt);
+  });
+  if (CONFIG.fotos.length > 0) {
+    fotoEditable.src = CONFIG.fotos[0].src;
+  }
+}
+inicializarSelectorFotos();
+
+selectFoto.addEventListener('change', () => {
+  // Cambiar imagen y limpiar accesorios puestos al cambiar de foto
+  fotoEditable.src = selectFoto.value;
+  document.querySelectorAll('.accesorio-puesto').forEach(el => el.remove());
+});
 
 document.querySelectorAll('.item-accesorio').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -441,7 +472,6 @@ function crearAccesorioArrastrable(emoji) {
   elem.addEventListener('pointerdown', e => {
     arrastrando = true;
     elem.setPointerCapture(e.pointerId);
-    const rect = lienzo.getBoundingClientRect();
     const elemRect = elem.getBoundingClientRect();
     offsetX = e.clientX - elemRect.left;
     offsetY = e.clientY - elemRect.top;
