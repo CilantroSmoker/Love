@@ -61,16 +61,16 @@
   .polaroid:nth-child(even) { transform:rotate(1.5deg); }
   .polaroid:hover { transform:rotate(0) scale(1.04); }
 
-  .pista { margin-top:64px; font-size:.85rem; opacity:.5; }
+  .pista { margin-top:64px; font-size:.85rem; opacity:.5; line-height: 1.8; }
   .pista span { color: var(--rosa); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .pista span:hover { color: var(--oro); }
 
-  /* Ventanas (carta, foto grande y juego) */
+  /* Ventanas (carta, foto grande, juegos) */
   .overlay { position:fixed; inset:0; z-index:20; display:flex; align-items:center; justify-content:center; padding:20px; background:rgba(10,5,15,.88); opacity:0; visibility:hidden; transition:opacity .35s, visibility .35s; }
   .overlay.visible { opacity:1; visibility:visible; }
   .overlay .contenido { transform:translateY(24px) scale(.96); transition:transform .45s ease; }
   .overlay.visible .contenido { transform:none; }
-  .cerrar { position:absolute; top:14px; right:18px; background:none; border:0; font-size:2rem; line-height:1; color:var(--crema); opacity:.8; cursor:pointer; }
+  .cerrar { position:absolute; top:14px; right:18px; background:none; border:0; font-size:2rem; line-height:1; color:var(--crema); opacity:.8; cursor:pointer; z-index: 5; }
 
   .papel { width:min(520px,100%); max-height:86vh; overflow-y:auto; background:var(--crema); color:var(--tinta); padding:40px 34px; border-radius:3px; text-align:left; box-shadow:0 20px 50px rgba(0,0,0,.6); }
   .papel h2 { font-family:'Caveat',cursive; font-weight:500; font-size:2.2rem; margin-bottom:18px; }
@@ -81,11 +81,7 @@
   .grande img { display:block; max-width:100%; max-height:68vh; margin:0 auto; }
   .grande figcaption { min-height:64px; padding:12px 8px; display:flex; align-items:center; justify-content:center; text-align:center; color:var(--tinta); font-family:'Caveat',cursive; font-size:1.7rem; line-height:1.2; }
 
-  .nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(27,16,38,.6); border:1px solid rgba(251,239,240,.3); border-radius:50%; width:46px; height:46px; font-size:2rem; line-height:1; cursor:pointer; z-index:1; }
-  .nav.ant { left:12px; } .nav.sig { right:12px; }
-  .nav.oculto { display:none; }
-
-  /* Estilos del Minijuego "Atrapa el Corazón" */
+  /* Estilos del Minijuego Atrapa el Corazón */
   .juego-card { background:var(--crema); color:var(--tinta); width:min(420px, 92vw); height:440px; border-radius:12px; padding:20px; display:flex; flex-direction:column; position:relative; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; }
   .juego-header { display:flex; justify-content:space-between; align-items:center; font-family:'Caveat',cursive; font-size:1.6rem; margin-bottom:10px; z-index:2; }
   .juego-area { flex:1; background:rgba(58,29,69,0.06); border:2px dashed rgba(58,29,69,0.2); border-radius:8px; position:relative; overflow:hidden; cursor:crosshair; }
@@ -97,6 +93,21 @@
   .juego-pantalla-final p { font-family:'Nunito',system-ui,sans-serif; font-size:1.1rem; line-height:1.5; margin-bottom:20px; }
   .btn-juego { background:var(--ciruela); color:var(--crema); border:0; padding:10px 24px; border-radius:8px; font-family:'Nunito',system-ui,sans-serif; font-weight:600; cursor:pointer; transition:transform .2s; }
   .btn-juego:hover { transform:scale(1.05); }
+
+  /* Estilos corregidos del Fotomatón (Foto completa sin cortes) */
+  .fotomaton-card { background:var(--crema); color:var(--tinta); width:min(460px, 94vw); border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; max-height: 90vh; overflow-y: auto; }
+  .fotomaton-card h3 { font-family:'Caveat',cursive; font-size:2rem; margin-bottom: 6px; color: var(--ciruela); }
+  .fotomaton-card p { font-size: 0.85rem; margin-bottom: 10px; opacity: 0.8; }
+  
+  .lienzo-foto { position: relative; width: 100%; background: #1b1026; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; user-select: none; }
+  .lienzo-foto img { width: 100%; height: auto; max-height: 55vh; object-fit: contain; display: block; margin: 0 auto; }
+  
+  .accesorio-puesto { position: absolute; font-size: 40px; cursor: grab; user-select: none; touch-action: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); z-index: 5; }
+  .accesorio-puesto:active { cursor: grabbing; }
+
+  .bandeja-accesorios { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center; background: rgba(58,29,69,0.06); padding: 10px; border-radius: 8px; width: 100%; }
+  .item-accesorio { font-size: 28px; cursor: pointer; background: #fff; border: 1px solid rgba(58,29,69,0.2); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+  .item-accesorio:hover { transform: scale(1.15); background: #fde8ed; }
 
   /* Reproductor Arriba a la derecha */
   #reproductor { position:fixed; right:12px; top:12px; z-index:10; display:flex; flex-direction:column; gap:6px; max-width:calc(100vw - 24px); width: 280px; padding:10px 12px; border-radius:14px; border:1px solid rgba(251,239,240,.35); background:rgba(27,16,38,0.9); backdrop-filter:blur(8px); font-size:.85rem; box-shadow: 0 10px 25px rgba(0,0,0,.5); transition:all .3s ease; }
@@ -161,7 +172,10 @@
   </section>
 
   <section class="fotos" id="fotos"></section>
-  <p class="pista">Toca cualquier parte de la pantalla o <span id="btn-juego-abrir">juega un ratito aquí 💖</span></p>
+  <p class="pista">
+    Toca cualquier parte de la pantalla<br>
+    💗 <span id="btn-juego-abrir">Jugar a atrapar corazones</span> | 👓 <span id="btn-foto-abrir">Poner accesorios a nuestra foto</span>
+  </p>
 </main>
 
 <!-- Reproductor arriba a la derecha -->
@@ -201,7 +215,7 @@
   <button class="nav sig" id="sig" aria-label="Foto siguiente">›</button>
 </div>
 
-<!-- Ventana Modal del Minijuego -->
+<!-- Ventana Modal del Minijuego de Corazones -->
 <div class="overlay" id="modal-juego" role="dialog" aria-modal="true" aria-label="Juego Atrapa el Corazón">
   <button class="cerrar" id="cerrar-juego" aria-label="Cerrar">×</button>
   <div class="contenido juego-card">
@@ -211,10 +225,41 @@
     </div>
     <div class="juego-area" id="juego-area"></div>
     <div class="juego-pantalla-final" id="pantalla-final" style="display:none;">
-      <h3>Felicidades 🎉🎉</h3>
-      <p>ha completado mi pequeño minijuego, si quieres puede volver a jugar</p>
+      <h3>¡Lo lograste, mi amor! 🥰</h3>
+      <p>Atrapaste todos los corazones... tal como atrapaste mi corazón desde el primer día.</p>
       <button class="btn-juego" id="btn-reiniciar">Jugar otra vez</button>
     </div>
+  </div>
+</div>
+
+<!-- Ventana Modal del Fotomatón de Accesorios (Usa fotos/2.jpeg completa) -->
+<div class="overlay" id="modal-fotomaton" role="dialog" aria-modal="true" aria-label="Fotomatón de Accesorios">
+  <button class="cerrar" id="cerrar-fotomaton" aria-label="Cerrar">×</button>
+  <div class="contenido fotomaton-card">
+    <h3>Fotomatón de Amor 👓🎩</h3>
+    <p>¡Toca un accesorio para agregarlo y arrastralo donde quieras!</p>
+    
+    <div class="lienzo-foto" id="lienzo-foto">
+      <img src="fotos/2.jpeg" alt="Nuestra foto" id="foto-editable">
+    </div>
+
+    <div class="bandeja-accesorios">
+      <div class="item-accesorio" data-val="🤙">🤙</div>
+      <div class="item-accesorio" data-val="🎩">🎩</div>
+      <div class="item-accesorio" data-val="🙏">🙏</div>
+      <div class="item-accesorio" data-val="👑">👑</div>
+      <div class="item-accesorio" data-val="💖">💖</div>
+      <div class="item-accesorio" data-val="💋">💋</div>
+      <div class="item-accesorio" data-val="🔥">🔥</div>
+      <div class="item-accesorio" data-val="✨">✨</div>
+      <div class="item-accesorio" data-val="🥵​">🥵​</div>
+      <div class="item-accesorio" data-val="🙀​">🙀​</div>
+      <div class="item-accesorio" data-val="💢​">💢​​</div>
+      <div class="item-accesorio" data-val="👅​">👅​</div>
+      <div class="item-accesorio" data-val="🎀​">🎀​</div>
+    </div>
+    
+    <button class="btn-juego" id="btn-limpiar-accesorios" style="margin-top: 10px;">Limpiar accesorios</button>
   </div>
 </div>
 
@@ -240,7 +285,7 @@ const CONFIG = {
   hitos: [
     { fecha: "26 de diciembre, 2019", titulo: "El día que empezó todo", desc: "El momento exacto en que nuestras vidas se cruzaron." },
     { fecha: "23 de febrero, 2022", titulo: "Cuando se confesó", desc: "Recuerdo ese dia con mucho cariño, porque me dijo que yo le gustaba." },
-    { fecha: "04 de agosto, 2022", titulo: "El dia que nos vimos", desc: "Fue el dia que nos vimos por primera vez, когда la fui a buscar a su liceo" },
+    { fecha: "04 de agosto, 2022", titulo: "El dia que nos vimos", desc: "Fue el dia que nos vimos por primera vez, cuando la fui a buscar a su liceo" },
     { fecha: "05 de agosto, 2022", titulo: "La propuesta", desc: "El dia que me armé de valor y le pedi que fuera mi polola." },
     { fecha: "Actualidad", titulo: "Pasan los dias", desc: "Los dias pasan, pero cuando la veo, me siento como el niño que se enamoró de usted." }
   ],
@@ -269,10 +314,8 @@ function actualizar() {
   let m = ahora.getMonth() - ini.getMonth();
   let d = ahora.getDate() - ini.getDate();
   let h = ahora.getHours() - ini.getHours();
-  let mi = now = ahora.getMinutes() - ini.getMinutes();
+  let mi = ahora.getMinutes() - ini.getMinutes();
   let s = ahora.getSeconds() - ini.getSeconds();
-  // Corregido cálculo de minutos
-  mi = ahora.getMinutes() - ini.getMinutes();
   if (s < 0)  { s += 60; mi--; }
   if (mi < 0) { mi += 60; h--; }
   if (h < 0)  { h += 24; d--; }
@@ -283,7 +326,7 @@ function actualizar() {
 }
 actualizar(); setInterval(actualizar, 1000);
 
-const overlays = [$('carta'), $('visor'), $('modal-juego')];
+const overlays = [$('carta'), $('visor'), $('modal-juego'), $('modal-fotomaton')];
 function cerrarTodo() {
   overlays.forEach(o => o.classList.remove('visible'));
   $('sobre').classList.remove('abierto');
@@ -324,12 +367,10 @@ function iniciarJuego() {
     corazon.className = 'corazon-item';
     corazon.textContent = '💖';
     
-    // Posición horizontal aleatoria dentro del área
     const maxX = area.clientWidth - 40;
     const randomX = Math.max(20, Math.floor(Math.random() * maxX));
     corazon.style.left = randomX + 'px';
     
-    // Velocidad de caída aleatoria entre 2s y 3.5s
     const duracion = 2 + Math.random() * 1.5;
     corazon.style.animationDuration = duracion + 's';
 
@@ -344,7 +385,6 @@ function iniciarJuego() {
       }
     });
 
-    // Remover al terminar animación si no lo atrapó
     corazon.addEventListener('animationend', () => {
       corazon.remove();
     });
@@ -373,6 +413,74 @@ $('btn-reiniciar').addEventListener('click', () => {
 });
 
 $('cerrar-juego').addEventListener('click', () => {
+  cerrarTodo();
+});
+
+
+/* ---- Lógica del Fotomatón de Accesorios (2.jpeg) ---- */
+const lienzo = $('lienzo-foto');
+
+document.querySelectorAll('.item-accesorio').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const emoji = btn.getAttribute('data-val');
+    crearAccesorioArrastrable(emoji);
+  });
+});
+
+function crearAccesorioArrastrable(emoji) {
+  const elem = document.createElement('div');
+  elem.className = 'accesorio-puesto';
+  elem.textContent = emoji;
+  elem.style.left = '45%';
+  elem.style.top = '40%';
+  
+  let arrastrando = false;
+  let offsetX = 0, offsetY = 0;
+
+  elem.addEventListener('pointerdown', e => {
+    arrastrando = true;
+    elem.setPointerCapture(e.pointerId);
+    const rect = lienzo.getBoundingClientRect();
+    const elemRect = elem.getBoundingClientRect();
+    offsetX = e.clientX - elemRect.left;
+    offsetY = e.clientY - elemRect.top;
+    e.stopPropagation();
+  });
+
+  elem.addEventListener('pointermove', e => {
+    if (!arrastrando) return;
+    const rect = lienzo.getBoundingClientRect();
+    let x = e.clientX - rect.left - offsetX;
+    let y = e.clientY - rect.top - offsetY;
+    
+    x = Math.max(0, Math.min(x, rect.width - 40));
+    y = Math.max(0, Math.min(y, rect.height - 40));
+
+    elem.style.left = x + 'px';
+    elem.style.top = y + 'px';
+  });
+
+  elem.addEventListener('pointerup', e => {
+    arrastrando = false;
+    elem.releasePointerCapture(e.pointerId);
+  });
+
+  elem.addEventListener('dblclick', () => {
+    elem.remove();
+  });
+
+  lienzo.appendChild(elem);
+}
+
+$('btn-limpiar-accesorios').addEventListener('click', () => {
+  document.querySelectorAll('.accesorio-puesto').forEach(el => el.remove());
+});
+
+$('btn-foto-abrir').addEventListener('click', () => {
+  $('modal-fotomaton').classList.add('visible');
+});
+
+$('cerrar-fotomaton').addEventListener('click', () => {
   cerrarTodo();
 });
 
