@@ -84,8 +84,8 @@
   /* Flechas de navegación del visor */
   .nav { position:absolute; top:50%; transform:translateY(-50%); background:rgba(58,29,69,0.85); color:var(--crema); border:1px solid rgba(242,161,181,0.4); border-radius:50%; width:44px; height:44px; font-size:1.8rem; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:10; transition:background 0.2s, transform 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
   .nav:hover { background:var(--ciruela); color:var(--oro); transform:translateY(-50%) scale(1.1); }
-  .nav.ant { left:-56px; } 
-  .nav.sig { right:-56px; }
+  .nav.ant { left:16px; }
+  .nav.sig { right:16px; }
   .nav.oculto { display:none; }
 
   @media (max-width: 640px) {
@@ -288,7 +288,10 @@
       <div class="item-accesorio" data-val="〰️">〰️</div>
     </div>
     
-    <button class="btn-juego" id="btn-limpiar-accesorios" style="margin-top: 10px;">Limpiar accesorios</button>
+    <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; justify-content:center;">
+  <button class="btn-juego" id="btn-limpiar-accesorios">Limpiar accesorios</button>
+  <button class="btn-juego" id="btn-guardar-foto">Guardar foto 💾</button>
+</div>
   </div>
 </div>
 
@@ -298,7 +301,7 @@ const CONFIG = {
   titulo: "Cada segundo importa",
   mensaje: "Muchas gracias por acompañarme durante tanto tiempo ♥.",
   musica: [
-    { src: "musica/1.mp3", titulo: "Claur de lune" },
+    { src: "musica/1.mp3", titulo: "Clair de lune" },
     { src: "musica/2.mp3", titulo: "Snow Flower - V" },
     { src: "musica/3.mp3", titulo: "Only - Lee hi" },
     { src: "musica/4.mp3", titulo: "Name - Kwak Jin Eon" },
@@ -377,6 +380,51 @@ if (CONFIG.hitos && CONFIG.hitos.length > 0) {
 } else {
   $('seccion-hitos').style.display = 'none';
 }
+
+/* ---- Guardar la foto con los accesorios ---- */
+$('btn-guardar-foto').addEventListener('click', () => {
+  const img = fotoEditable;
+  if (!img.complete || !img.naturalWidth) return;
+  try {
+    // Dónde se está mostrando realmente la foto dentro de su caja
+    const r = img.getBoundingClientRect();
+    const esc = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
+    const w = img.naturalWidth * esc, h = img.naturalHeight * esc;
+    const x0 = r.left + (r.width - w) / 2, y0 = r.top + (r.height - h) / 2;
+    const k = img.naturalWidth / w; // pantalla -> tamaño real de la foto
+
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+
+    document.querySelectorAll('.accesorio-puesto').forEach(el => {
+      const b = el.getBoundingClientRect();
+      const tam = parseFloat(getComputedStyle(el).fontSize) * k;
+      g.font = tam + 'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(el.textContent, (b.left + b.width / 2 - x0) * k, (b.top + b.height / 2 - y0) * k);
+    });
+
+    c.toBlob(blob => {
+      if (!blob) return;
+      const archivo = new File([blob], 'nuestra-foto.png', { type: 'image/png' });
+      const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      if (esIOS && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+        navigator.share({ files: [archivo] }).catch(() => {});   // en iPhone: "Guardar imagen"
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'nuestra-foto.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+      const btn = $('btn-guardar-foto'); btn.textContent = '¡Guardada! ✓';
+      setTimeout(() => { btn.textContent = 'Guardar foto 💾'; }, 2000);
+    }, 'image/png');
+  } catch (err) {
+    alert('No se pudo guardar la foto. Prueba desde el link publicado de la página.');
+  }
+});
 
 /* ---- Lógica del Minijuego Atrapa el Corazón ---- */
 let score = 0, juegoInterval = null, juegoActivo = false;
