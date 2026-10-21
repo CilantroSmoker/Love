@@ -159,6 +159,15 @@
   .corazon { position:fixed; z-index:5; pointer-events:none; font-size:22px; color:var(--rosa); animation:sube 1.6s ease-out forwards; }
   @keyframes sube { from { opacity:1; transform:translate(-50%,-50%) scale(.6); } to { opacity:0; transform:translate(-50%,-260%) scale(1.4); } }
   @media (prefers-reduced-motion:reduce) { .corazon { animation-duration:.01s; } .overlay .contenido, .solapa { transition:none; } }
+
+  /* Avión con pancarta */
+.avion { position:fixed; left:0; top:0; z-index:4; display:flex; align-items:center; cursor:pointer; will-change:transform; }
+.avion[hidden] { display:none; }
+.banner { background:var(--crema); color:var(--tinta); font-family:'Caveat',cursive; font-size:1.5rem; padding:4px 22px 4px 32px; white-space:nowrap; clip-path:polygon(0 0,100% 0,100% 100%,0 100%,14px 50%); transform-origin:right center; animation:ondea 1.4s ease-in-out infinite alternate; }
+.cuerda { width:36px; height:2px; background:rgba(251,239,240,.7); }
+.avion svg { animation:cabeceo 2s ease-in-out infinite alternate; }
+@keyframes ondea { from { transform:skewY(-2.5deg); } to { transform:skewY(2.5deg); } }
+@keyframes cabeceo { from { transform:rotate(-3deg); } to { transform:rotate(3deg); } }
 </style>
 </head>
 <body>
@@ -197,6 +206,17 @@
     💗 <span id="btn-juego-abrir">Jugar a atrapar corazones</span> | 👓 <span id="btn-foto-abrir">Poner accesorios a nuestras fotos</span>
   </p>
 </main>
+
+<div id="avion" class="avion" hidden>
+  <div class="banner"><span id="avion-txt"></span></div>
+  <div class="cuerda"></div>
+  <svg viewBox="0 0 90 36" width="90" height="36" aria-hidden="true">
+    <path d="M8 18 L2 5 L14 5 L19 18Z" fill="#f2a1b5"/>
+    <path d="M4 18 Q4 12 14 12 L66 12 Q84 12 88 18 Q84 24 66 24 L14 24 Q4 24 4 18Z" fill="#fbeff0"/>
+    <path d="M32 19 L50 32 L58 32 L50 19Z" fill="#f2a1b5"/>
+    <circle cx="72" cy="17" r="3" fill="#3a1d45"/>
+  </svg>
+</div>
 
 <!-- Reproductor arriba a la derecha -->
 <div id="reproductor" class="colapsado" hidden>
@@ -327,12 +347,16 @@ const CONFIG = {
     "Prometo amarte y respetarte hasta el ultimo de mis dias.",
     "Te amo más que a mi vida."
   ],
+  mensajesAvion: [
+    "Te amo, Katy", "Eres mi persona favorita", "Gracias por quedarte", "Mi chanchis ♥", "♥ ♥ ♥ ♥ ♥ ♥ ♥", "¿ha sido feliz conmigo 😢?"
+  ],
   cartaFirma: "Wladimir",
   fotos: [
     { src: "fotos/1.jpeg", texto: "Nuestra tradición" },
     { src: "fotos/2.jpeg", texto: "Mi chanchis" },
     { src: "fotos/3.jpeg", texto: "Te amo ♥" }
   ]
+  
 };
 
 const $ = id => document.getElementById(id);
@@ -822,6 +846,37 @@ addEventListener('pointerdown', e => {
   c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
   document.body.appendChild(c); setTimeout(() => c.remove(), 1700);
 });
+/* ---- Avión con pancarta ---- */
+const avion = $('avion');
+let ultimoMsg = -1;
+function programarAvion(ms) { setTimeout(lanzarAvion, ms); }
+function lanzarAvion() {
+  const msgs = CONFIG.mensajesAvion || [];
+  if (!msgs.length || reducir) return;
+  if (document.hidden || overlays.some(o => o.classList.contains('visible'))) { programarAvion(8000); return; }
+  let i;
+  do { i = Math.floor(Math.random() * msgs.length); } while (msgs.length > 1 && i === ultimoMsg);
+  ultimoMsg = i;
+  $('avion-txt').textContent = msgs[i];
+  avion.hidden = false;
+  avion.style.top = (5 + Math.random() * 10) + 'vh';
+  const w = avion.offsetWidth, ancho = innerWidth;
+  const anim = avion.animate(
+    [{ transform: 'translateX(' + (-w) + 'px)' }, { transform: 'translateX(' + ancho + 'px)' }],
+    { duration: (ancho + w) / 70 * 1000, easing: 'linear' }
+  );
+  anim.onfinish = () => { avion.hidden = true; programarAvion(60000 + Math.random() * 30000); };
+}
+avion.addEventListener('pointerdown', e => {
+  for (let k = 0; k < 6; k++) {
+    const c = document.createElement('div');
+    c.className = 'corazon'; c.textContent = '♥';
+    c.style.left = (e.clientX + (Math.random() - .5) * 80) + 'px';
+    c.style.top = (e.clientY + (Math.random() - .5) * 40) + 'px';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 1700);
+  }
+});
+programarAvion(2000);
 </script>
 </body>
 </html>
