@@ -186,6 +186,21 @@
   .pz-tablero.listo .pz-pieza { border-color:transparent; }
   .pz-tablero.listo .pz-pieza.hueco { display:block; }
 
+  /* Decorador de sala */
+  .hab-svg { display:block; width:100%; height:auto; border-radius:8px; margin:8px 0 10px; box-shadow:0 4px 14px rgba(0,0,0,.2); }
+  .hab-tabs { display:flex; gap:6px; overflow-x:auto; padding-bottom:6px; margin-bottom:4px; }
+  .hab-tab { flex:none; padding:7px 13px; border-radius:999px; border:1px solid rgba(58,29,69,.25); background:#fff; color:var(--tinta); font:inherit; font-size:.85rem; cursor:pointer; }
+  .hab-tab.activa { background:var(--ciruela); color:var(--crema); border-color:var(--ciruela); }
+  .hab-grupo p { text-align:left; font-weight:600; font-size:.8rem; margin:8px 0 4px; opacity:.75; }
+  .hab-fila { display:flex; flex-wrap:wrap; gap:6px; }
+  .hab-chip { display:flex; align-items:center; gap:6px; padding:7px 11px; border-radius:999px; border:2px solid transparent; background:#fff; color:var(--tinta); font:inherit; font-size:.85rem; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.12); }
+  .hab-chip.sel { border-color:var(--rosa); background:#fde8ed; font-weight:600; }
+  .hab-chip i { width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.2); }
+  #hab-listo { margin-top:14px; }
+  .hab-resumen { list-style:none; padding:0; margin:0 0 12px; font-size:.85rem; text-align:left; columns:2; }
+  .hab-resumen li { margin-bottom:4px; }
+  .hab-botones { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
   /* Avión con pancarta */
   .avion { position:fixed; left:0; top:0; z-index:4; display:flex; align-items:center; cursor:pointer; will-change:transform; }
   .avion[hidden] { display:none; }
@@ -303,7 +318,7 @@
   </div>
 </div>
 
-<!-- Hilo con aro: el pergamino se desenrolla y el aro cuelga de su vara de abajo -->
+<!-- Hilo con aro -->
 <div class="hilo" id="hilo">
   <div class="rollo">
     <div class="vara"></div>
@@ -430,6 +445,27 @@
   </div>
 </div>
 
+<!-- Decorador de sala -->
+<div class="overlay" id="modal-hab" role="dialog" aria-modal="true" aria-label="Decora la sala">
+  <button class="cerrar" aria-label="Cerrar">×</button>
+  <div class="contenido tarjeta-juego">
+    <h3>Decora nuestra sala 🛋️</h3>
+    <svg id="hab-svg" class="hab-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Vista de la sala"></svg>
+    <div class="hab-tabs" id="hab-tabs"></div>
+    <div id="hab-ops"></div>
+    <button class="btn-juego" id="hab-listo">Listo ✓</button>
+    <div class="fin-juego" id="hab-fin" hidden>
+      <h3>¡Quedó preciosa! 🥰</h3>
+      <p id="hab-fin-txt"></p>
+      <ul class="hab-resumen" id="hab-resumen"></ul>
+      <div class="hab-botones">
+        <button class="btn-juego" id="hab-guardar">Guardar imagen 💾</button>
+        <button class="btn-juego" id="hab-seguir">Seguir decorando</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 const CONFIG = {
   inicio: new Date(2022, 7, 5, 16, 9),
@@ -467,6 +503,7 @@ const CONFIG = {
   ],
   memoFin: "Cada pareja me recuerda que contigo todo encaja ♥",
   puzzleFin: "Armaste la foto, igual que armamos nuestra historia ♥",
+  habFin: "Así de linda sería nuestra casa, y quiero armarla contigo ♥",
   cartaFirma: "Wladimir",
   fotos: [
     { src: "fotos/1.jpeg", texto: "Nuestra tradición" },
@@ -498,7 +535,7 @@ function actualizar() {
 }
 actualizar(); setInterval(actualizar, 1000);
 
-const overlays = [$('carta'), $('visor'), $('modal-juego'), $('modal-fotomaton'), $('modal-memo'), $('modal-puzzle')];
+const overlays = [$('carta'), $('visor'), $('modal-juego'), $('modal-fotomaton'), $('modal-memo'), $('modal-puzzle'), $('modal-hab')];
 function cerrarTodo() {
   overlays.forEach(o => o.classList.remove('visible'));
   $('sobre').classList.remove('abierto');
@@ -953,7 +990,7 @@ avion.addEventListener('pointerdown', e => {
     document.body.appendChild(c); setTimeout(() => c.remove(), 1700);
   }
 });
-programarAvion(20000);   // primer avión a los 20 segundos (para probar, bájalo a 2000)
+programarAvion(20000);
 
 /* ---- Utilidades de los juegos de fotos ---- */
 const fotosOk = () => lista.filter(f => !f.roto);
@@ -1004,7 +1041,7 @@ $('memo-otra').addEventListener('click', memoIniciar);
 
 /* ---- Rompecabezas deslizante (3x3) ---- */
 const PZ = 3, pzTab = $('pz-tablero'), pzSel = $('pz-select');
-let pzEstado = [], pzMov = 0, pzImg = null, pzListo = false;   // pzEstado[posición] = número de pieza; la pieza 8 es el hueco
+let pzEstado = [], pzMov = 0, pzImg = null, pzListo = false;
 
 function pzVecinos(p) {
   const r = Math.floor(p / PZ), c = p % PZ, v = [];
@@ -1028,7 +1065,7 @@ function pzPintarFondo() {
   if (!pzImg) return;
   const S = pzTab.clientWidth, nw = pzImg.naturalWidth, nh = pzImg.naturalHeight;
   if (!S || !nw) return;
-  const sc = S / Math.min(nw, nh), iw = nw * sc, ih = nh * sc;   // la foto se recorta al centro en un cuadrado
+  const sc = S / Math.min(nw, nh), iw = nw * sc, ih = nh * sc;
   const ox = (S - iw) / 2, oy = (S - ih) / 2, t = S / PZ;
   pzTab.querySelectorAll('.pz-pieza').forEach(p => {
     const id = +p.dataset.id, r = Math.floor(id / PZ), c = id % PZ;
@@ -1049,7 +1086,7 @@ function pzMezclar() {
   do {
     pzEstado = Array.from({ length: PZ * PZ }, (_, i) => i);
     let hueco = PZ * PZ - 1, previo = -1;
-    for (let k = 0; k < 150; k++) {            // se mezcla con jugadas válidas: siempre tiene solución
+    for (let k = 0; k < 150; k++) {
       const opciones = pzVecinos(hueco).filter(v => v !== previo);
       const v = opciones[Math.floor(Math.random() * opciones.length)];
       [pzEstado[hueco], pzEstado[v]] = [pzEstado[v], pzEstado[hueco]];
@@ -1096,6 +1133,145 @@ pzSel.addEventListener('change', pzCargar);
 $('pz-mezclar').addEventListener('click', pzMezclar);
 addEventListener('resize', pzPintarFondo);
 
+/* ---- Decora nuestra sala ---- */
+const TELAS = [
+  { id: 'rosa', nombre: 'Rosa', color: '#e9a9bb' }, { id: 'crema', nombre: 'Crema', color: '#e8dcc4' },
+  { id: 'gris', nombre: 'Gris', color: '#9a98a6' }, { id: 'salvia', nombre: 'Salvia', color: '#9db69a' },
+  { id: 'azul', nombre: 'Azul noche', color: '#3f4a7a' }, { id: 'terracota', nombre: 'Terracota', color: '#c9805f' },
+  { id: 'lila', nombre: 'Lila', color: '#b9a2d6' }
+];
+const SINO = [{ id: 'si', nombre: 'Sí' }, { id: 'no', nombre: 'No' }];
+
+const HAB = [
+  { tab: 'Paredes', grupos: [{ clave: 'pared', titulo: 'Color de las paredes', def: 'rosa', ops: [
+    { id: 'rosa', nombre: 'Rosa palo', color: '#f1d1d8' }, { id: 'lavanda', nombre: 'Lavanda', color: '#d8cdea' },
+    { id: 'crema', nombre: 'Crema', color: '#f2e8d0' }, { id: 'salvia', nombre: 'Verde salvia', color: '#cbd9c6' },
+    { id: 'cielo', nombre: 'Celeste', color: '#cfe0ee' }, { id: 'terracota', nombre: 'Terracota', color: '#e2b59e' }] }] },
+  { tab: 'Piso', grupos: [{ clave: 'piso', titulo: 'Tipo de piso', def: 'clara', ops: [
+    { id: 'clara', nombre: 'Madera clara', color: '#d9b98b' }, { id: 'oscura', nombre: 'Madera oscura', color: '#8a5a3b' },
+    { id: 'gris', nombre: 'Gris', color: '#aaa8b2' }, { id: 'blanco', nombre: 'Blanco', color: '#e9e5dd' }] }] },
+  { tab: 'Sillón', grupos: [
+    { clave: 'sofa', titulo: 'Forma del sillón', def: 'recto', ops: [{ id: 'recto', nombre: 'Sofá recto' }, { id: 'ele', nombre: 'Sofá en L' }, { id: 'butacas', nombre: 'Dos butacas' }] },
+    { clave: 'sofaColor', titulo: 'Color del sillón', def: 'crema', ops: TELAS }] },
+  { tab: 'Alfombra', grupos: [
+    { clave: 'alfombra', titulo: 'Alfombra', def: 'redonda', ops: [{ id: 'ninguna', nombre: 'Sin alfombra' }, { id: 'redonda', nombre: 'Redonda' }, { id: 'rect', nombre: 'Rectangular' }] },
+    { clave: 'alfombraColor', titulo: 'Color de la alfombra', def: 'lila', ops: TELAS, si: 'alfombra' }] },
+  { tab: 'Pufs', grupos: [
+    { clave: 'puf', titulo: 'Pufs', def: 'uno', ops: [{ id: 'ninguno', nombre: 'Sin puf' }, { id: 'uno', nombre: 'Un puf' }, { id: 'dos', nombre: 'Dos pufs' }] },
+    { clave: 'pufColor', titulo: 'Color del puf', def: 'rosa', ops: TELAS, si: 'puf' }] },
+  { tab: 'Mesa', grupos: [
+    { clave: 'mesa', titulo: 'Mesa de centro', def: 'redonda', ops: [{ id: 'ninguna', nombre: 'Sin mesa' }, { id: 'redonda', nombre: 'Redonda' }, { id: 'cuadrada', nombre: 'Cuadrada' }] },
+    { clave: 'mesaMat', titulo: 'Material de la mesa', def: 'madera', si: 'mesa', ops: [
+      { id: 'madera', nombre: 'Madera', color: '#b98a5e' }, { id: 'blanca', nombre: 'Blanca', color: '#f2eee8' }, { id: 'vidrio', nombre: 'Vidrio', color: '#bfe2ee' }] }] },
+  { tab: 'Extras', grupos: [
+    { clave: 'planta', titulo: 'Planta', def: 'si', ops: SINO },
+    { clave: 'lampara', titulo: 'Lámpara de pie', def: 'si', ops: SINO },
+    { clave: 'cuadros', titulo: 'Cuadros en la pared', def: 'si', ops: SINO }] }
+];
+const habGrupo = {};
+HAB.forEach(t => t.grupos.forEach(g => { habGrupo[g.clave] = g; }));
+const apagado = v => v === 'ninguna' || v === 'ninguno' || v === 'no';
+const hab = { estado: {}, tab: 0, listo: false };
+
+const ajustarColor = (hex, f) => {
+  const n = parseInt(hex.slice(1), 16), t = Math.abs(f), m = f < 0 ? 0 : 255;
+  return '#' + [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(v + (m - v) * t).toString(16).padStart(2, '0')).join('');
+};
+
+function habSVG(e) {
+  const c = k => habGrupo[k].ops.find(o => o.id === e[k]).color;
+  const base = c('sofaColor'), osc = ajustarColor(base, -0.14), cla = ajustarColor(base, 0.12);
+  const mm = c('mesaMat'), mOsc = ajustarColor(mm, -0.22), pc = c('pufColor'), ac = c('alfombraColor');
+  let s = '<rect width="400" height="300" fill="' + c('pared') + '"/>';
+  s += '<rect x="290" y="40" width="76" height="76" rx="4" fill="#d6ebf8" stroke="#fff" stroke-width="5"/><path d="M328 40v76M290 78h76" stroke="#fff" stroke-width="4"/>';
+  if (e.cuadros === 'si') s += '<rect x="116" y="48" width="58" height="44" fill="#fff" stroke="#d9ae4e" stroke-width="3"/><circle cx="145" cy="70" r="12" fill="#f2a1b5"/><rect x="190" y="56" width="40" height="30" fill="#fff" stroke="#d9ae4e" stroke-width="3"/><path d="M196 80l12-14 10 8 8-10 4 16z" fill="#9db69a"/>';
+  s += '<rect y="190" width="400" height="110" fill="' + c('piso') + '"/><rect y="186" width="400" height="6" fill="#fff" opacity=".7"/><path d="M0 218h400M0 248h400M0 278h400" stroke="#000" stroke-opacity=".07"/>';
+  if (e.alfombra === 'redonda') s += '<ellipse cx="200" cy="242" rx="125" ry="34" fill="' + ac + '"/><ellipse cx="200" cy="242" rx="100" ry="26" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>';
+  if (e.alfombra === 'rect') s += '<path d="M95 212h210l36 58H59z" fill="' + ac + '"/><path d="M110 220h180l26 42H84z" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/>';
+  if (e.planta === 'si') s += '<path d="M28 238c-14-22-18-42-8-62 6 20 10 38 8 62zM28 238c4-26 14-44 30-56-2 22-12 42-30 56zM28 238c-2-20 0-34 10-48 0 18-2 34-10 48z" fill="#6fa070"/><rect x="12" y="236" width="32" height="34" rx="5" fill="#c9805f"/>';
+  if (e.lampara === 'si') s += '<circle cx="372" cy="112" r="30" fill="#ffe9a8" opacity=".35"/><path d="M372 128v142" stroke="#8a6a3a" stroke-width="4"/><ellipse cx="372" cy="270" rx="16" ry="4" fill="#8a6a3a"/><path d="M356 126l6-26h20l6 26z" fill="#f6e6bf"/>';
+  if (e.sofa === 'recto') s += '<rect x="80" y="116" width="180" height="64" rx="14" fill="' + osc + '"/><rect x="72" y="150" width="196" height="44" rx="12" fill="' + base + '"/><rect x="56" y="128" width="30" height="66" rx="13" fill="' + cla + '"/><rect x="254" y="128" width="30" height="66" rx="13" fill="' + cla + '"/>';
+  if (e.sofa === 'ele') s += '<rect x="70" y="116" width="226" height="64" rx="14" fill="' + osc + '"/><rect x="62" y="150" width="236" height="44" rx="12" fill="' + base + '"/><rect x="226" y="150" width="72" height="74" rx="12" fill="' + base + '"/><rect x="226" y="150" width="72" height="14" rx="7" fill="' + cla + '"/><rect x="46" y="128" width="30" height="66" rx="13" fill="' + cla + '"/>';
+  if (e.sofa === 'butacas') [60, 240].forEach(x => {
+    s += '<rect x="' + (x + 6) + '" y="120" width="56" height="62" rx="14" fill="' + osc + '"/><rect x="' + x + '" y="156" width="68" height="40" rx="12" fill="' + base + '"/><rect x="' + (x - 6) + '" y="136" width="20" height="60" rx="10" fill="' + cla + '"/><rect x="' + (x + 54) + '" y="136" width="20" height="60" rx="10" fill="' + cla + '"/>';
+  });
+  if (e.mesa === 'redonda') s += '<path d="M184 246v18M216 246v18" stroke="' + mOsc + '" stroke-width="4"/><ellipse cx="200" cy="246" rx="36" ry="10" fill="' + mOsc + '"/><ellipse cx="200" cy="240" rx="36" ry="10" fill="' + mm + '" stroke="#000" stroke-opacity=".12"/>';
+  if (e.mesa === 'cuadrada') s += '<rect x="154" y="255" width="6" height="12" fill="' + mOsc + '"/><rect x="240" y="255" width="6" height="12" fill="' + mOsc + '"/><rect x="148" y="248" width="104" height="7" fill="' + mOsc + '"/><path d="M160 232h80l12 16H148z" fill="' + mm + '" stroke="#000" stroke-opacity=".12"/>';
+  if (e.puf !== 'ninguno') s += '<rect x="304" y="238" width="48" height="34" rx="17" fill="' + pc + '"/><rect x="312" y="238" width="32" height="8" rx="4" fill="' + ajustarColor(pc, 0.25) + '" opacity=".7"/>';
+  if (e.puf === 'dos') s += '<rect x="262" y="252" width="40" height="30" rx="15" fill="' + ajustarColor(pc, -0.08) + '"/>';
+  return s;
+}
+
+function habPintar() {
+  $('hab-svg').innerHTML = habSVG(hab.estado);
+  [...$('hab-tabs').children].forEach((b, i) => b.classList.toggle('activa', i === hab.tab));
+  const cont = $('hab-ops'); cont.innerHTML = '';
+  HAB[hab.tab].grupos.forEach(g => {
+    if (g.si && apagado(hab.estado[g.si])) return;
+    const caja = document.createElement('div'); caja.className = 'hab-grupo';
+    const t = document.createElement('p'); t.textContent = g.titulo;
+    const fila = document.createElement('div'); fila.className = 'hab-fila';
+    g.ops.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'hab-chip' + (hab.estado[g.clave] === o.id ? ' sel' : '');
+      if (o.color) { const dot = document.createElement('i'); dot.style.background = o.color; b.appendChild(dot); }
+      b.appendChild(document.createTextNode(o.nombre));
+      b.addEventListener('click', () => { hab.estado[g.clave] = o.id; habPintar(); });
+      fila.appendChild(b);
+    });
+    caja.append(t, fila); cont.appendChild(caja);
+  });
+}
+
+function abrirHab() {
+  if (!hab.listo) {
+    HAB.forEach((t, i) => {
+      t.grupos.forEach(g => { hab.estado[g.clave] = g.def; });
+      const b = document.createElement('button'); b.className = 'hab-tab'; b.textContent = t.tab;
+      b.addEventListener('click', () => { hab.tab = i; habPintar(); });
+      $('hab-tabs').appendChild(b);
+    });
+    hab.listo = true;
+  }
+  habPintar();
+  $('modal-hab').classList.add('visible');
+}
+
+$('hab-listo').addEventListener('click', () => {
+  const ul = $('hab-resumen'); ul.innerHTML = '';
+  HAB.forEach(t => t.grupos.forEach(g => {
+    if (g.si && apagado(hab.estado[g.si])) return;
+    const li = document.createElement('li');
+    li.textContent = g.titulo + ': ' + g.ops.find(o => o.id === hab.estado[g.clave]).nombre;
+    ul.appendChild(li);
+  }));
+  $('hab-fin-txt').textContent = CONFIG.habFin || '';
+  $('hab-fin').hidden = false;
+  $('hab-fin').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+});
+$('hab-seguir').addEventListener('click', () => { $('hab-fin').hidden = true; });
+$('hab-guardar').addEventListener('click', () => {
+  const xml = new XMLSerializer().serializeToString($('hab-svg'));
+  const img = new Image();
+  img.onload = () => {
+    const cv2 = document.createElement('canvas'); cv2.width = 1200; cv2.height = 900;
+    cv2.getContext('2d').drawImage(img, 0, 0, 1200, 900);
+    cv2.toBlob(blob => {
+      if (!blob) return;
+      const archivo = new File([blob], 'nuestra-sala.png', { type: 'image/png' });
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent) && navigator.canShare && navigator.canShare({ files: [archivo] })) {
+        navigator.share({ files: [archivo] }).catch(() => {});
+      } else {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = 'nuestra-sala.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      }
+    }, 'image/png');
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+});
+
 /* ---- Hilo, rollo y pergamino ---- */
 const hilo = $('hilo'), aro = $('hilo-aro'), rollo = hilo.querySelector('.rollo'), cuerpo = $('pergamino');
 const ANCHO_CERRADO = 54;
@@ -1103,7 +1279,6 @@ let menuAbierto = false, tirY = null, p0 = 0, pAct = 0, movio = false;
 const anchoAbierto = () => Math.min(250, innerWidth * 0.78);
 const altoAbierto = () => Math.max(60, Math.min(cuerpo.scrollHeight, innerHeight - 190));
 
-// p va de 0 (enrollado) a 1 (desplegado)
 function aplicar(p) {
   pAct = p;
   rollo.style.width = (ANCHO_CERRADO + (anchoAbierto() - ANCHO_CERRADO) * p) + 'px';
@@ -1118,7 +1293,6 @@ function alternarMenu(v) {
   aplicar(menuAbierto ? 1 : 0);
 }
 
-// Tirar del aro: el pergamino sigue al dedo
 aro.addEventListener('pointerdown', e => {
   tirY = e.clientY; p0 = menuAbierto ? 1 : 0; movio = false;
   hilo.classList.add('tirando');
@@ -1134,25 +1308,26 @@ aro.addEventListener('pointermove', e => {
 aro.addEventListener('pointerup', () => {
   if (tirY === null) return;
   tirY = null; hilo.classList.remove('tirando');
-  alternarMenu(movio ? pAct > 0.5 : !menuAbierto);   // tirón: decide por la mitad; toque: alterna
+  alternarMenu(movio ? pAct > 0.5 : !menuAbierto);
 });
 aro.addEventListener('pointercancel', () => {
   tirY = null; hilo.classList.remove('tirando'); aplicar(menuAbierto ? 1 : 0);
 });
-aro.addEventListener('click', e => { if (e.detail === 0) alternarMenu(); });   // teclado
+aro.addEventListener('click', e => { if (e.detail === 0) alternarMenu(); });
 addEventListener('resize', () => { if (menuAbierto) aplicar(1); });
 
-// Cerrar al tocar fuera o con Esc
 addEventListener('pointerdown', e => { if (menuAbierto && !hilo.contains(e.target)) alternarMenu(false); });
 addEventListener('keydown', e => { if (e.key === 'Escape') alternarMenu(false); });
 
-// Lo que aparece en el pergamino: para agregar algo nuevo, suma una línea aquí
+/* ---- Menú desplegable del pergamino (AQUÍ FALTABA AGREGAR abrirHab) ---- */
 const JUEGOS = [
   { icono: '💖', nombre: 'Atrapa los corazones', desc: 'Atrapa 10 corazones', accion: () => $('btn-juego-abrir').click() },
   { icono: '👓', nombre: 'Fotomatón', desc: 'Ponle accesorios a nuestras fotos', accion: () => $('btn-foto-abrir').click() },
   { icono: '🃏', nombre: 'Memorama', desc: 'Encuentra las parejas de fotos', accion: abrirMemo },
-  { icono: '🧩', nombre: 'Rompecabezas', desc: 'Arma una foto deslizando piezas', accion: abrirPuzzle }
+  { icono: '🧩', nombre: 'Rompecabezas', desc: 'Arma una foto deslizando piezas', accion: abrirPuzzle },
+  { icono: '🛋️', nombre: 'Decora la sala', desc: 'Diseña nuestra casita ideal', accion: abrirHab }
 ];
+
 JUEGOS.forEach(j => {
   const b = document.createElement('button');
   b.className = 'item-menu';
