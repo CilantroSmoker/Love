@@ -93,7 +93,7 @@
     .nav.sig { right: 8px; background: rgba(27,16,38,0.8); }
   }
 
-  /* Estilos del Minijuego Atrapa el Corazón */
+  /* Minijuego Atrapa el Corazón */
   .juego-card { background:var(--crema); color:var(--tinta); width:min(420px, 92vw); height:440px; border-radius:12px; padding:20px; display:flex; flex-direction:column; position:relative; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; }
   .juego-header { display:flex; justify-content:space-between; align-items:center; font-family:'Caveat',cursive; font-size:1.6rem; margin-bottom:10px; z-index:2; }
   .juego-area { flex:1; background:rgba(58,29,69,0.06); border:2px dashed rgba(58,29,69,0.2); border-radius:8px; position:relative; overflow:hidden; cursor:crosshair; }
@@ -106,18 +106,18 @@
   .btn-juego { background:var(--ciruela); color:var(--crema); border:0; padding:10px 24px; border-radius:8px; font-family:'Nunito',system-ui,sans-serif; font-weight:600; cursor:pointer; transition:transform .2s; }
   .btn-juego:hover { transform:scale(1.05); }
 
-  /* Estilos del Fotomatón con Selector de Fotos */
+  /* Fotomatón */
   .fotomaton-card { background:var(--crema); color:var(--tinta); width:min(460px, 94vw); border-radius:12px; padding:20px; display:flex; flex-direction:column; align-items:center; box-shadow:0 20px 50px rgba(0,0,0,.6); text-align:center; max-height: 92vh; overflow-y: auto; }
   .fotomaton-card h3 { font-family:'Caveat',cursive; font-size:2rem; margin-bottom: 4px; color: var(--ciruela); }
   .fotomaton-card p { font-size: 0.85rem; margin-bottom: 8px; opacity: 0.8; }
-  
+
   .selector-foto-wrap { width: 100%; margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
   .selector-foto-wrap label { font-size: 0.8rem; font-weight: 600; opacity: 0.75; }
   .selector-foto-wrap select { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid rgba(58,29,69,0.3); background: #fff; font-family: inherit; font-size: 0.9rem; color: var(--tinta); cursor: pointer; }
 
   .lienzo-foto { position: relative; width: 100%; background: #1b1026; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; user-select: none; }
   .lienzo-foto img { width: 100%; height: auto; max-height: 48vh; object-fit: contain; display: block; margin: 0 auto; }
-  
+
   .accesorio-puesto { position: absolute; font-size: 40px; cursor: grab; user-select: none; touch-action: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); z-index: 5; }
   .accesorio-puesto:active { cursor: grabbing; }
 
@@ -125,10 +125,10 @@
   .item-accesorio { font-size: 26px; cursor: pointer; background: #fff; border: 1px solid rgba(58,29,69,0.2); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
   .item-accesorio:hover { transform: scale(1.15); background: #fde8ed; }
 
-  /* Reproductor Arriba a la derecha */
+  /* Reproductor arriba a la derecha */
   #reproductor { position:fixed; right:12px; top:12px; z-index:10; display:flex; flex-direction:column; gap:6px; max-width:calc(100vw - 24px); width: 280px; padding:10px 12px; border-radius:14px; border:1px solid rgba(251,239,240,.35); background:rgba(27,16,38,0.9); backdrop-filter:blur(8px); font-size:.85rem; box-shadow: 0 10px 25px rgba(0,0,0,.5); transition:all .3s ease; }
   #reproductor[hidden] { display:none; }
-  
+
   #reproductor.colapsado { width: 44px; height: 44px; border-radius: 50%; padding: 0; justify-content: center; align-items: center; overflow: hidden; }
   #reproductor.colapsado .m-contenido-expandido { display: none; }
   #reproductor.colapsado .m-fila-superior { width: 100%; height: 100%; justify-content: center; margin: 0; }
@@ -137,17 +137,17 @@
 
   .m-fila-superior { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
   .m-contenido-expandido { display: flex; flex-direction: column; gap: 6px; width: 100%; }
-  
+
   #reproductor button { background:none; border:0; cursor:pointer; padding:4px 6px; font-size:1rem; line-height:1; color: var(--crema); display: flex; align-items: center; justify-content: center; }
   #reproductor button:hover { color: var(--rosa); }
   #m-titulo { max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; opacity:.9; font-weight: 600; }
-  
+
   .m-controles-centro { display: flex; align-items: center; justify-content: center; gap: 8px; }
-  
+
   #m-shuffle { opacity: 0.45; transition: opacity 0.2s, color 0.2s; }
   #m-shuffle svg { width: 18px; height: 18px; fill: currentColor; }
   #m-shuffle.activo { opacity: 1; color: var(--oro); filter: drop-shadow(0 0 4px rgba(244,217,160,0.6)); }
-  
+
   .m-barra-wrap { display: flex; align-items: center; gap: 6px; width: 100%; font-size: 0.75rem; opacity: 0.8; }
   #m-progreso { flex: 1; accent-color: var(--rosa); height: 4px; cursor: pointer; }
 
@@ -155,19 +155,54 @@
   #toast-musica { position: fixed; top: 110px; right: 12px; z-index: 30; background: rgba(58, 29, 69, 0.95); border: 1px solid var(--rosa); padding: 10px 16px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.5); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; transform: translateY(-20px); opacity: 0; visibility: hidden; transition: all 0.4s ease; backdrop-filter: blur(6px); color: var(--crema); pointer-events: none; }
   #toast-musica.mostrar { transform: translateY(0); opacity: 1; visibility: visible; }
   #toast-musica span { color: var(--oro); font-weight: 600; }
-  
+
   .corazon { position:fixed; z-index:5; pointer-events:none; font-size:22px; color:var(--rosa); animation:sube 1.6s ease-out forwards; }
   @keyframes sube { from { opacity:1; transform:translate(-50%,-50%) scale(.6); } to { opacity:0; transform:translate(-50%,-260%) scale(1.4); } }
-  @media (prefers-reduced-motion:reduce) { .corazon { animation-duration:.01s; } .overlay .contenido, .solapa { transition:none; } }
 
   /* Avión con pancarta */
-.avion { position:fixed; left:0; top:0; z-index:4; display:flex; align-items:center; cursor:pointer; will-change:transform; }
-.avion[hidden] { display:none; }
-.banner { background:var(--crema); color:var(--tinta); font-family:'Caveat',cursive; font-size:1.5rem; padding:4px 22px 4px 32px; white-space:nowrap; clip-path:polygon(0 0,100% 0,100% 100%,0 100%,14px 50%); transform-origin:right center; animation:ondea 1.4s ease-in-out infinite alternate; }
-.cuerda { width:36px; height:2px; background:rgba(251,239,240,.7); }
-.avion svg { animation:cabeceo 2s ease-in-out infinite alternate; }
-@keyframes ondea { from { transform:skewY(-2.5deg); } to { transform:skewY(2.5deg); } }
-@keyframes cabeceo { from { transform:rotate(-3deg); } to { transform:rotate(3deg); } }
+  .avion { position:fixed; left:0; top:0; z-index:4; display:flex; align-items:center; cursor:pointer; will-change:transform; }
+  .avion[hidden] { display:none; }
+  .banner { background:var(--crema); color:var(--tinta); font-family:'Caveat',cursive; font-size:1.5rem; padding:4px 22px 4px 32px; white-space:nowrap; clip-path:polygon(0 0,100% 0,100% 100%,0 100%,14px 50%); transform-origin:right center; animation:ondea 1.4s ease-in-out infinite alternate; }
+  .cuerda { width:36px; height:2px; background:rgba(251,239,240,.7); }
+  .avion svg { animation:cabeceo 2s ease-in-out infinite alternate; }
+  @keyframes ondea { from { transform:skewY(-2.5deg); } to { transform:skewY(2.5deg); } }
+  @keyframes cabeceo { from { transform:rotate(-3deg); } to { transform:rotate(3deg); } }
+
+  /* Hilo, rollo y pergamino */
+  .hilo { position:fixed; top:0; left:20px; z-index:9; display:flex; flex-direction:column; align-items:center; }
+  .rollo { width:54px; transition:width .5s cubic-bezier(.3,.8,.3,1); filter:drop-shadow(0 8px 14px rgba(0,0,0,.45)); }
+  .vara { position:relative; z-index:1; height:8px; margin:0 -4px; border-radius:4px; background:linear-gradient(#f9e7b0,#d9ae4e 55%,#a07a2a); }
+  .vara::before, .vara::after { content:''; position:absolute; top:-2px; width:6px; height:12px; border-radius:3px; background:#f4d9a0; }
+  .vara::before { left:-3px; } .vara::after { right:-3px; }
+  .pergamino-cuerpo { height:0; overflow:hidden; background:linear-gradient(180deg,rgba(58,29,69,.97),rgba(33,17,44,.97)); border-left:1px solid rgba(244,217,160,.35); border-right:1px solid rgba(244,217,160,.35); transition:height .7s cubic-bezier(.3,.8,.3,1); }
+  .hilo.abierto .pergamino-cuerpo { overflow-y:auto; overflow-x:hidden; }
+  .hilo.tirando .rollo, .hilo.tirando .pergamino-cuerpo { transition:none; }
+  .pergamino-contenido { width:min(250px,78vw); padding:14px 14px 16px; color:var(--crema); }
+  .pergamino-contenido h4 { font-family:'Caveat',cursive; font-weight:500; font-size:1.7rem; text-align:center; color:var(--oro); }
+
+  .hilo-balanceo { display:flex; flex-direction:column; align-items:center; margin-top:-1px; transform-origin:top center; animation:balanceo 4s ease-in-out infinite alternate; }
+  .hilo.tirando .hilo-balanceo { animation:none; }
+  @keyframes balanceo { from { transform:rotate(-2.5deg); } to { transform:rotate(2.5deg); } }
+  .hilo-linea { width:2px; height:36px; background:linear-gradient(#c9a24a,#f4d9a0); }
+  .hilo-aro { position:relative; width:26px; height:26px; padding:0; border:0; border-radius:50%; cursor:grab; touch-action:none;
+    background:radial-gradient(circle, transparent 44%, #f9e7b0 47%, #d9ae4e 68%, #8f6a22 100%); box-shadow:0 0 12px rgba(244,217,160,.45); }
+  .hilo-aro::before { content:''; position:absolute; inset:-12px; }
+  .hilo-aro:active { cursor:grabbing; }
+  .hilo-pista { position:absolute; left:calc(100% + 6px); top:44px; font-family:'Caveat',cursive; font-size:1.25rem; color:var(--oro); white-space:nowrap; opacity:.85; transition:opacity .6s; pointer-events:none; }
+  .hilo.visto .hilo-pista { opacity:0; }
+
+  .item-menu { display:flex; align-items:center; gap:10px; width:100%; margin-top:8px; padding:9px 11px; text-align:left; cursor:pointer; color:var(--crema); background:rgba(251,239,240,.06); border:1px solid rgba(242,161,181,.3); border-radius:8px; }
+  .item-menu:hover { background:rgba(242,161,181,.16); }
+  .item-menu .im-icono { font-size:22px; }
+  .item-menu b { display:block; font-size:.95rem; }
+  .item-menu small { font-size:.78rem; opacity:.75; }
+
+  @media (prefers-reduced-motion:reduce) {
+    .corazon { animation-duration:.01s; }
+    .overlay .contenido, .solapa { transition:none; }
+    .hilo-balanceo { animation:none; }
+    .rollo, .pergamino-cuerpo { transition:none; }
+  }
 </style>
 </head>
 <body>
@@ -241,6 +276,25 @@
   </div>
 </div>
 
+<!-- Hilo con aro: el pergamino se desenrolla y el aro cuelga de su vara de abajo -->
+<div class="hilo" id="hilo">
+  <div class="rollo">
+    <div class="vara"></div>
+    <div class="pergamino-cuerpo" id="pergamino" aria-hidden="true">
+      <div class="pergamino-contenido">
+        <h4>Rincón de juegos</h4>
+        <div id="pergamino-lista"></div>
+      </div>
+    </div>
+    <div class="vara"></div>
+  </div>
+  <div class="hilo-balanceo">
+    <div class="hilo-linea"></div>
+    <button class="hilo-aro" id="hilo-aro" aria-label="Menú de juegos" aria-expanded="false"></button>
+  </div>
+  <span class="hilo-pista">tira ↓</span>
+</div>
+
 <!-- Notificación emergente -->
 <div id="toast-musica">
   🎵 Estás escuchando: <span id="toast-titulo"></span>
@@ -258,7 +312,7 @@
   <button class="nav sig" id="sig" aria-label="Foto siguiente">›</button>
 </div>
 
-<!-- Ventana Modal del Minijuego de Corazones -->
+<!-- Minijuego de corazones -->
 <div class="overlay" id="modal-juego" role="dialog" aria-modal="true" aria-label="Juego Atrapa el Corazón">
   <button class="cerrar" id="cerrar-juego" aria-label="Cerrar">×</button>
   <div class="contenido juego-card">
@@ -275,13 +329,13 @@
   </div>
 </div>
 
-<!-- Ventana Modal del Fotomatón con Selector de Fotos -->
+<!-- Fotomatón -->
 <div class="overlay" id="modal-fotomaton" role="dialog" aria-modal="true" aria-label="Fotomatón de Accesorios">
   <button class="cerrar" id="cerrar-fotomaton" aria-label="Cerrar">×</button>
   <div class="contenido fotomaton-card">
     <h3>Fotomatón de Amor 👓🎩</h3>
     <p>¡Elige una foto, ponte accesorios y arrástralos!</p>
-    
+
     <div class="selector-foto-wrap">
       <label for="select-foto-edit">Elige qué foto editar:</label>
       <select id="select-foto-edit"></select>
@@ -300,18 +354,18 @@
       <div class="item-accesorio" data-val="💋">💋</div>
       <div class="item-accesorio" data-val="🔥">🔥</div>
       <div class="item-accesorio" data-val="✨">✨</div>
-      <div class="item-accesorio" data-val="🥵​">🥵​</div>
-      <div class="item-accesorio" data-val="🙀​">🙀​</div>
-      <div class="item-accesorio" data-val="💢​">💢</div>
-      <div class="item-accesorio" data-val="👅​">👅</div>
-      <div class="item-accesorio" data-val="🎀​">🎀</div>
+      <div class="item-accesorio" data-val="🥵">🥵</div>
+      <div class="item-accesorio" data-val="🙀">🙀</div>
+      <div class="item-accesorio" data-val="💢">💢</div>
+      <div class="item-accesorio" data-val="👅">👅</div>
+      <div class="item-accesorio" data-val="🎀">🎀</div>
       <div class="item-accesorio" data-val="〰️">〰️</div>
     </div>
-    
+
     <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap; justify-content:center;">
-  <button class="btn-juego" id="btn-limpiar-accesorios">Limpiar accesorios</button>
-  <button class="btn-juego" id="btn-guardar-foto">Guardar foto 💾</button>
-</div>
+      <button class="btn-juego" id="btn-limpiar-accesorios">Limpiar accesorios</button>
+      <button class="btn-juego" id="btn-guardar-foto">Guardar foto 💾</button>
+    </div>
   </div>
 </div>
 
@@ -356,7 +410,6 @@ const CONFIG = {
     { src: "fotos/2.jpeg", texto: "Mi chanchis" },
     { src: "fotos/3.jpeg", texto: "Te amo ♥" }
   ]
-  
 };
 
 const $ = id => document.getElementById(id);
@@ -410,12 +463,11 @@ $('btn-guardar-foto').addEventListener('click', () => {
   const img = fotoEditable;
   if (!img.complete || !img.naturalWidth) return;
   try {
-    // Dónde se está mostrando realmente la foto dentro de su caja
     const r = img.getBoundingClientRect();
     const esc = Math.min(r.width / img.naturalWidth, r.height / img.naturalHeight);
     const w = img.naturalWidth * esc, h = img.naturalHeight * esc;
     const x0 = r.left + (r.width - w) / 2, y0 = r.top + (r.height - h) / 2;
-    const k = img.naturalWidth / w; // pantalla -> tamaño real de la foto
+    const k = img.naturalWidth / w;
 
     const c = document.createElement('canvas');
     c.width = img.naturalWidth; c.height = img.naturalHeight;
@@ -435,7 +487,7 @@ $('btn-guardar-foto').addEventListener('click', () => {
       const archivo = new File([blob], 'nuestra-foto.png', { type: 'image/png' });
       const esIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       if (esIOS && navigator.canShare && navigator.canShare({ files: [archivo] })) {
-        navigator.share({ files: [archivo] }).catch(() => {});   // en iPhone: "Guardar imagen"
+        navigator.share({ files: [archivo] }).catch(() => {});
       } else {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob); a.download = 'nuestra-foto.png';
@@ -450,7 +502,7 @@ $('btn-guardar-foto').addEventListener('click', () => {
   }
 });
 
-/* ---- Lógica del Minijuego Atrapa el Corazón ---- */
+/* ---- Minijuego Atrapa el Corazón ---- */
 let score = 0, juegoInterval = null, juegoActivo = false;
 
 function iniciarJuego() {
@@ -467,11 +519,11 @@ function iniciarJuego() {
     const corazon = document.createElement('div');
     corazon.className = 'corazon-item';
     corazon.textContent = '💖';
-    
+
     const maxX = area.clientWidth - 40;
     const randomX = Math.max(20, Math.floor(Math.random() * maxX));
     corazon.style.left = randomX + 'px';
-    
+
     const duracion = 2 + Math.random() * 1.5;
     corazon.style.animationDuration = duracion + 's';
 
@@ -481,15 +533,10 @@ function iniciarJuego() {
       score++;
       $('score').textContent = score;
       corazon.remove();
-      if (score >= 10) {
-        finalizarJuego();
-      }
+      if (score >= 10) finalizarJuego();
     });
 
-    corazon.addEventListener('animationend', () => {
-      corazon.remove();
-    });
-
+    corazon.addEventListener('animationend', () => corazon.remove());
     area.appendChild(corazon);
   }, 700);
 }
@@ -508,17 +555,10 @@ $('btn-juego-abrir').addEventListener('click', () => {
   $('modal-juego').classList.add('visible');
   iniciarJuego();
 });
+$('btn-reiniciar').addEventListener('click', () => iniciarJuego());
+$('cerrar-juego').addEventListener('click', () => cerrarTodo());
 
-$('btn-reiniciar').addEventListener('click', () => {
-  iniciarJuego();
-});
-
-$('cerrar-juego').addEventListener('click', () => {
-  cerrarTodo();
-});
-
-
-/* ---- Lógica del Fotomatón con Selector de Fotos ---- */
+/* ---- Fotomatón con selector de fotos ---- */
 const lienzo = $('lienzo-foto');
 const selectFoto = $('select-foto-edit');
 const fotoEditable = $('foto-editable');
@@ -531,9 +571,7 @@ function inicializarSelectorFotos() {
     opt.textContent = (f.texto ? f.texto : ('Foto ' + (idx + 1)));
     selectFoto.appendChild(opt);
   });
-  if (CONFIG.fotos.length > 0) {
-    fotoEditable.src = CONFIG.fotos[0].src;
-  }
+  if (CONFIG.fotos.length > 0) fotoEditable.src = CONFIG.fotos[0].src;
 }
 inicializarSelectorFotos();
 
@@ -543,10 +581,7 @@ selectFoto.addEventListener('change', () => {
 });
 
 document.querySelectorAll('.item-accesorio').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const emoji = btn.getAttribute('data-val');
-    crearAccesorioArrastrable(emoji);
-  });
+  btn.addEventListener('click', () => crearAccesorioArrastrable(btn.getAttribute('data-val')));
 });
 
 function crearAccesorioArrastrable(emoji) {
@@ -555,7 +590,7 @@ function crearAccesorioArrastrable(emoji) {
   elem.textContent = emoji;
   elem.style.left = '45%';
   elem.style.top = '40%';
-  
+
   let arrastrando = false;
   let offsetX = 0, offsetY = 0;
 
@@ -573,10 +608,8 @@ function crearAccesorioArrastrable(emoji) {
     const rect = lienzo.getBoundingClientRect();
     let x = e.clientX - rect.left - offsetX;
     let y = e.clientY - rect.top - offsetY;
-    
     x = Math.max(0, Math.min(x, rect.width - 40));
     y = Math.max(0, Math.min(y, rect.height - 40));
-
     elem.style.left = x + 'px';
     elem.style.top = y + 'px';
   });
@@ -586,25 +619,15 @@ function crearAccesorioArrastrable(emoji) {
     elem.releasePointerCapture(e.pointerId);
   });
 
-  elem.addEventListener('dblclick', () => {
-    elem.remove();
-  });
-
+  elem.addEventListener('dblclick', () => elem.remove());
   lienzo.appendChild(elem);
 }
 
 $('btn-limpiar-accesorios').addEventListener('click', () => {
   document.querySelectorAll('.accesorio-puesto').forEach(el => el.remove());
 });
-
-$('btn-foto-abrir').addEventListener('click', () => {
-  $('modal-fotomaton').classList.add('visible');
-});
-
-$('cerrar-fotomaton').addEventListener('click', () => {
-  cerrarTodo();
-});
-
+$('btn-foto-abrir').addEventListener('click', () => $('modal-fotomaton').classList.add('visible'));
+$('cerrar-fotomaton').addEventListener('click', () => cerrarTodo());
 
 /* ---- Notificación flotante de música ---- */
 let toastTimeout = null;
@@ -612,14 +635,11 @@ function mostrarToastCancion(tituloCancion) {
   const toast = $('toast-musica');
   $('toast-titulo').textContent = tituloCancion;
   toast.classList.add('mostrar');
-  
   if (toastTimeout) clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => {
-    toast.classList.remove('mostrar');
-  }, 4000);
+  toastTimeout = setTimeout(() => toast.classList.remove('mostrar'), 4000);
 }
 
-/* ---- Reproductor Inteligente con Shuffle Real ---- */
+/* ---- Reproductor con shuffle ---- */
 let audio = null, quiere = false, idx = 0, esAleatorio = false;
 let sirve = [].concat(CONFIG.musica || []).map(c => typeof c === 'string' ? { src: c, titulo: '' } : c);
 let colaAleatoria = [];
@@ -648,9 +668,8 @@ function obtenerSiguienteIndice() {
   if (esAleatorio) {
     if (colaAleatoria.length === 0) generarColaAleatoria();
     return colaAleatoria.shift();
-  } else {
-    return (idx + 1) % sirve.length;
   }
+  return (idx + 1) % sirve.length;
 }
 
 function obtenerAnteriorIndice() {
@@ -658,9 +677,8 @@ function obtenerAnteriorIndice() {
   if (esAleatorio) {
     if (colaAleatoria.length === 0) generarColaAleatoria();
     return colaAleatoria.shift();
-  } else {
-    return (idx - 1 + sirve.length) % sirve.length;
   }
+  return (idx - 1 + sirve.length) % sirve.length;
 }
 
 function cargar(i, sonar) {
@@ -673,7 +691,7 @@ function cargar(i, sonar) {
   $('m-progreso').value = 0;
   $('m-tiempo-actual').textContent = "0:00";
   $('m-tiempo-total').textContent = "0:00";
-  
+
   if (sonar) {
     audio.play().catch(() => {});
     mostrarToastCancion(tituloActual);
@@ -681,9 +699,9 @@ function cargar(i, sonar) {
 }
 
 function iniciarMusica() {
-  if (audio && audio.paused) { 
-    quiere = true; 
-    audio.play().catch(() => {}); 
+  if (audio && audio.paused) {
+    quiere = true;
+    audio.play().catch(() => {});
     mostrarToastCancion(sirve[idx].titulo || 'Canción ' + (idx + 1));
   }
 }
@@ -707,33 +725,26 @@ if (sirve.length) {
   audio.addEventListener('play', () => { $('m-play').textContent = '❚❚'; });
   audio.addEventListener('pause', () => { $('m-play').textContent = '▶'; });
   audio.addEventListener('ended', () => cargar(obtenerSiguienteIndice(), true));
-  
-  audio.addEventListener('error', () => { 
+
+  audio.addEventListener('error', () => {
     const rota = sirve[idx];
     sirve = sirve.filter(c => c !== rota);
     cargar(idx, quiere);
   });
 
   $('m-play').addEventListener('click', () => {
-    if (audio.paused) { 
-      quiere = true; 
-      audio.play().catch(() => {}); 
+    if (audio.paused) {
+      quiere = true;
+      audio.play().catch(() => {});
       mostrarToastCancion(sirve[idx].titulo || 'Canción ' + (idx + 1));
-    } else { 
-      quiere = false; 
-      audio.pause(); 
+    } else {
+      quiere = false;
+      audio.pause();
     }
   });
-  
-  $('m-sig').addEventListener('click', () => { 
-    quiere = true; 
-    cargar(obtenerSiguienteIndice(), true); 
-  });
-  
-  $('m-ant').addEventListener('click', () => { 
-    quiere = true; 
-    cargar(obtenerAnteriorIndice(), true); 
-  });
+
+  $('m-sig').addEventListener('click', () => { quiere = true; cargar(obtenerSiguienteIndice(), true); });
+  $('m-ant').addEventListener('click', () => { quiere = true; cargar(obtenerAnteriorIndice(), true); });
 
   $('m-shuffle').addEventListener('click', () => {
     esAleatorio = !esAleatorio;
@@ -745,13 +756,12 @@ if (sirve.length) {
     if (audio.duration) audio.currentTime = e.target.value;
   });
 
-  $('m-btn-toggle').addEventListener('click', () => {
-    $('reproductor').classList.toggle('colapsado');
-  });
+  $('m-btn-toggle').addEventListener('click', () => $('reproductor').classList.toggle('colapsado'));
 
   cargar(0, false);
 }
 
+/* ---- Carta ---- */
 const papel = $('papel');
 const h2 = document.createElement('h2'); h2.textContent = CONFIG.cartaTitulo; papel.appendChild(h2);
 CONFIG.carta.forEach(t => { const p = document.createElement('p'); p.textContent = t; papel.appendChild(p); });
@@ -765,6 +775,7 @@ $('sobre').addEventListener('click', () => {
   }, 650);
 });
 
+/* ---- Fotos y visor ---- */
 const lista = CONFIG.fotos.map(it => typeof it === 'string' ? { src: it, texto: '' } : it);
 let actual = 0;
 function mostrar(i) {
@@ -807,6 +818,7 @@ lista.forEach(f => {
   $('fotos').appendChild(marco);
 });
 
+/* ---- Fondo animado: pétalos y estrellas ---- */
 const cv = $('fondo'), ctx = cv.getContext('2d');
 let W, H, particulas = [];
 const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -840,12 +852,14 @@ function dibujar(t) {
 }
 addEventListener('resize', ajustar); ajustar(); requestAnimationFrame(dibujar);
 
+/* ---- Corazones al tocar ---- */
 addEventListener('pointerdown', e => {
   const c = document.createElement('div');
   c.className = 'corazon'; c.textContent = '♥';
   c.style.left = e.clientX + 'px'; c.style.top = e.clientY + 'px';
   document.body.appendChild(c); setTimeout(() => c.remove(), 1700);
 });
+
 /* ---- Avión con pancarta ---- */
 const avion = $('avion');
 let ultimoMsg = -1;
@@ -876,7 +890,70 @@ avion.addEventListener('pointerdown', e => {
     document.body.appendChild(c); setTimeout(() => c.remove(), 1700);
   }
 });
-programarAvion(2000);
+programarAvion(20000);   // primer avión a los 20 segundos (para probar, bájalo a 2000)
+
+/* ---- Hilo, rollo y pergamino ---- */
+const hilo = $('hilo'), aro = $('hilo-aro'), rollo = hilo.querySelector('.rollo'), cuerpo = $('pergamino');
+const ANCHO_CERRADO = 54;
+let menuAbierto = false, tirY = null, p0 = 0, pAct = 0, movio = false;
+const anchoAbierto = () => Math.min(250, innerWidth * 0.78);
+const altoAbierto = () => Math.max(60, Math.min(cuerpo.scrollHeight, innerHeight - 190));
+
+// p va de 0 (enrollado) a 1 (desplegado)
+function aplicar(p) {
+  pAct = p;
+  rollo.style.width = (ANCHO_CERRADO + (anchoAbierto() - ANCHO_CERRADO) * p) + 'px';
+  cuerpo.style.height = (altoAbierto() * p) + 'px';
+}
+function alternarMenu(v) {
+  menuAbierto = typeof v === 'boolean' ? v : !menuAbierto;
+  hilo.classList.toggle('abierto', menuAbierto);
+  if (menuAbierto) hilo.classList.add('visto');
+  aro.setAttribute('aria-expanded', String(menuAbierto));
+  cuerpo.setAttribute('aria-hidden', String(!menuAbierto));
+  aplicar(menuAbierto ? 1 : 0);
+}
+
+// Tirar del aro: el pergamino sigue al dedo
+aro.addEventListener('pointerdown', e => {
+  tirY = e.clientY; p0 = menuAbierto ? 1 : 0; movio = false;
+  hilo.classList.add('tirando');
+  aro.setPointerCapture(e.pointerId);
+  e.stopPropagation();
+});
+aro.addEventListener('pointermove', e => {
+  if (tirY === null) return;
+  const dy = e.clientY - tirY;
+  if (Math.abs(dy) > 6) movio = true;
+  aplicar(Math.max(0, Math.min(1, p0 + dy / altoAbierto())));
+});
+aro.addEventListener('pointerup', () => {
+  if (tirY === null) return;
+  tirY = null; hilo.classList.remove('tirando');
+  alternarMenu(movio ? pAct > 0.5 : !menuAbierto);   // tirón: decide por la mitad; toque: alterna
+});
+aro.addEventListener('pointercancel', () => {
+  tirY = null; hilo.classList.remove('tirando'); aplicar(menuAbierto ? 1 : 0);
+});
+aro.addEventListener('click', e => { if (e.detail === 0) alternarMenu(); });   // teclado
+addEventListener('resize', () => { if (menuAbierto) aplicar(1); });
+
+// Cerrar al tocar fuera o con Esc
+addEventListener('pointerdown', e => { if (menuAbierto && !hilo.contains(e.target)) alternarMenu(false); });
+addEventListener('keydown', e => { if (e.key === 'Escape') alternarMenu(false); });
+
+// Lo que aparece en el pergamino: para agregar algo nuevo, suma una línea aquí
+const JUEGOS = [
+  { icono: '💖', nombre: 'Atrapa los corazones', desc: 'Atrapa 10 corazones', accion: () => $('btn-juego-abrir').click() },
+  { icono: '👓', nombre: 'Fotomatón', desc: 'Ponle accesorios a nuestras fotos', accion: () => $('btn-foto-abrir').click() }
+];
+JUEGOS.forEach(j => {
+  const b = document.createElement('button');
+  b.className = 'item-menu';
+  b.innerHTML = '<span class="im-icono">' + j.icono + '</span><span><b>' + j.nombre + '</b><small>' + j.desc + '</small></span>';
+  b.addEventListener('click', () => { alternarMenu(false); setTimeout(j.accion, 250); });
+  $('pergamino-lista').appendChild(b);
+});
 </script>
 </body>
 </html>
