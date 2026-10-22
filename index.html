@@ -159,6 +159,33 @@
   .corazon { position:fixed; z-index:5; pointer-events:none; font-size:22px; color:var(--rosa); animation:sube 1.6s ease-out forwards; }
   @keyframes sube { from { opacity:1; transform:translate(-50%,-50%) scale(.6); } to { opacity:0; transform:translate(-50%,-260%) scale(1.4); } }
 
+  /* Memorama y rompecabezas */
+  .tarjeta-juego { background:var(--crema); color:var(--tinta); width:min(440px,94vw); max-height:92vh; overflow-y:auto; border-radius:12px; padding:18px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,.6); }
+  .tarjeta-juego h3 { font-family:'Caveat',cursive; font-weight:500; font-size:2rem; color:var(--ciruela); line-height:1.1; }
+  .tarjeta-juego p { font-size:.9rem; margin:2px 0 10px; opacity:.85; }
+  .fin-juego { margin-top:14px; }
+  .fin-juego[hidden] { display:none; }
+  .fin-juego p { font-size:1rem; opacity:1; margin-bottom:12px; }
+
+  .memo-grid { display:grid; gap:8px; }
+  .carta-memo { position:relative; aspect-ratio:1/1; padding:0; border:0; background:none; cursor:pointer; perspective:600px; }
+  .carta-memo .cara { position:absolute; inset:0; border-radius:8px; overflow:hidden; backface-visibility:hidden; transition:transform .45s; }
+  .carta-memo .dorso { display:flex; align-items:center; justify-content:center; font-size:26px; color:var(--oro); background:linear-gradient(135deg,var(--ciruela),#241230); border:2px solid rgba(244,217,160,.6); }
+  .carta-memo .frente { transform:rotateY(180deg); border:4px solid #fff; background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.25); }
+  .carta-memo .frente img { display:block; width:100%; height:100%; object-fit:cover; }
+  .carta-memo.volteada .dorso { transform:rotateY(180deg); }
+  .carta-memo.volteada .frente { transform:rotateY(0); }
+  .carta-memo.par .frente { border-color:var(--rosa); }
+
+  .pz-barra { display:flex; gap:10px; align-items:center; margin-bottom:6px; }
+  .pz-barra select { flex:1; padding:8px 10px; border-radius:6px; border:1px solid rgba(58,29,69,.3); background:#fff; color:var(--tinta); font:inherit; font-size:.9rem; }
+  .pz-barra img { width:44px; height:44px; object-fit:cover; border-radius:6px; border:2px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  .pz-tablero { position:relative; width:min(340px,80vw); aspect-ratio:1/1; margin:0 auto 12px; background:var(--ciruela); border-radius:8px; overflow:hidden; }
+  .pz-pieza { position:absolute; width:33.3333%; height:33.3333%; padding:0; border:1px solid var(--crema); background-repeat:no-repeat; background-origin:border-box; cursor:pointer; transition:left .18s, top .18s; }
+  .pz-pieza.hueco { display:none; }
+  .pz-tablero.listo .pz-pieza { border-color:transparent; }
+  .pz-tablero.listo .pz-pieza.hueco { display:block; }
+
   /* Avión con pancarta */
   .avion { position:fixed; left:0; top:0; z-index:4; display:flex; align-items:center; cursor:pointer; will-change:transform; }
   .avion[hidden] { display:none; }
@@ -369,6 +396,40 @@
   </div>
 </div>
 
+<!-- Memorama -->
+<div class="overlay" id="modal-memo" role="dialog" aria-modal="true" aria-label="Memorama">
+  <button class="cerrar" aria-label="Cerrar">×</button>
+  <div class="contenido tarjeta-juego">
+    <h3>Memorama de nosotros 🃏</h3>
+    <p>Encuentra las parejas. Intentos: <strong id="memo-mov">0</strong></p>
+    <div class="memo-grid" id="memo-grid"></div>
+    <div class="fin-juego" id="memo-fin" hidden>
+      <h3>¡Las encontraste todas! 🥰</h3>
+      <p id="memo-fin-txt"></p>
+      <button class="btn-juego" id="memo-otra">Jugar otra vez</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rompecabezas deslizante -->
+<div class="overlay" id="modal-puzzle" role="dialog" aria-modal="true" aria-label="Rompecabezas">
+  <button class="cerrar" aria-label="Cerrar">×</button>
+  <div class="contenido tarjeta-juego">
+    <h3>Rompecabezas 🧩</h3>
+    <div class="pz-barra">
+      <select id="pz-select" aria-label="Elige la foto"></select>
+      <img id="pz-mini" alt="Foto completa">
+    </div>
+    <p>Desliza las piezas hasta armar la foto. Movimientos: <strong id="pz-mov">0</strong></p>
+    <div class="pz-tablero" id="pz-tablero"></div>
+    <button class="btn-juego" id="pz-mezclar">Mezclar de nuevo</button>
+    <div class="fin-juego" id="pz-fin" hidden>
+      <h3>¡Lo lograste! 🥰</h3>
+      <p id="pz-fin-txt"></p>
+    </div>
+  </div>
+</div>
+
 <script>
 const CONFIG = {
   inicio: new Date(2022, 7, 5, 16, 9),
@@ -404,6 +465,8 @@ const CONFIG = {
   mensajesAvion: [
     "Te amo, Katy", "Eres mi persona favorita", "Gracias por quedarte", "Mi chanchis ♥", "♥ ♥ ♥ ♥ ♥ ♥ ♥", "¿ha sido feliz conmigo 😢?"
   ],
+  memoFin: "Cada pareja me recuerda que contigo todo encaja ♥",
+  puzzleFin: "Armaste la foto, igual que armamos nuestra historia ♥",
   cartaFirma: "Wladimir",
   fotos: [
     { src: "fotos/1.jpeg", texto: "Nuestra tradición" },
@@ -435,7 +498,7 @@ function actualizar() {
 }
 actualizar(); setInterval(actualizar, 1000);
 
-const overlays = [$('carta'), $('visor'), $('modal-juego'), $('modal-fotomaton')];
+const overlays = [$('carta'), $('visor'), $('modal-juego'), $('modal-fotomaton'), $('modal-memo'), $('modal-puzzle')];
 function cerrarTodo() {
   overlays.forEach(o => o.classList.remove('visible'));
   $('sobre').classList.remove('abierto');
@@ -892,6 +955,147 @@ avion.addEventListener('pointerdown', e => {
 });
 programarAvion(20000);   // primer avión a los 20 segundos (para probar, bájalo a 2000)
 
+/* ---- Utilidades de los juegos de fotos ---- */
+const fotosOk = () => lista.filter(f => !f.roto);
+function barajar(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ---- Memorama ---- */
+let memoAbiertas = [], memoBloqueo = false, memoPares = 0, memoMov = 0, memoTotal = 0;
+function memoIniciar() {
+  const fs = fotosOk().slice(0, 8);
+  const grid = $('memo-grid'); grid.innerHTML = '';
+  $('memo-fin').hidden = true;
+  memoAbiertas = []; memoBloqueo = false; memoPares = 0; memoMov = 0; memoTotal = fs.length;
+  $('memo-mov').textContent = 0;
+  const mazo = barajar(fs.flatMap(f => [f, f]));
+  grid.style.gridTemplateColumns = 'repeat(' + (mazo.length <= 6 ? 3 : 4) + ', 1fr)';
+  mazo.forEach(f => {
+    const c = document.createElement('button');
+    c.className = 'carta-memo'; c.dataset.src = f.src; c.setAttribute('aria-label', 'Carta');
+    c.innerHTML = '<span class="cara dorso">♥</span><span class="cara frente"><img alt="" src="' + f.src + '"></span>';
+    c.addEventListener('click', () => {
+      if (memoBloqueo || c.classList.contains('volteada')) return;
+      c.classList.add('volteada'); memoAbiertas.push(c);
+      if (memoAbiertas.length < 2) return;
+      memoMov++; $('memo-mov').textContent = memoMov;
+      const [a, b] = memoAbiertas;
+      if (a.dataset.src === b.dataset.src) {
+        a.classList.add('par'); b.classList.add('par'); memoAbiertas = []; memoPares++;
+        if (memoPares === memoTotal) {
+          $('memo-fin-txt').textContent = 'Lo lograste en ' + memoMov + ' intentos. ' + (CONFIG.memoFin || '');
+          $('memo-fin').hidden = false;
+        }
+      } else {
+        memoBloqueo = true;
+        setTimeout(() => { a.classList.remove('volteada'); b.classList.remove('volteada'); memoAbiertas = []; memoBloqueo = false; }, 800);
+      }
+    });
+    grid.appendChild(c);
+  });
+}
+function abrirMemo() { memoIniciar(); $('modal-memo').classList.add('visible'); }
+$('memo-otra').addEventListener('click', memoIniciar);
+
+/* ---- Rompecabezas deslizante (3x3) ---- */
+const PZ = 3, pzTab = $('pz-tablero'), pzSel = $('pz-select');
+let pzEstado = [], pzMov = 0, pzImg = null, pzListo = false;   // pzEstado[posición] = número de pieza; la pieza 8 es el hueco
+
+function pzVecinos(p) {
+  const r = Math.floor(p / PZ), c = p % PZ, v = [];
+  if (c > 0) v.push(p - 1);
+  if (c < PZ - 1) v.push(p + 1);
+  if (r > 0) v.push(p - PZ);
+  if (r < PZ - 1) v.push(p + PZ);
+  return v;
+}
+function pzCrear() {
+  if (pzTab.children.length) return;
+  for (let id = 0; id < PZ * PZ; id++) {
+    const b = document.createElement('button');
+    b.className = 'pz-pieza' + (id === PZ * PZ - 1 ? ' hueco' : '');
+    b.dataset.id = id; b.setAttribute('aria-label', 'Pieza ' + (id + 1));
+    b.addEventListener('click', () => pzTocar(id));
+    pzTab.appendChild(b);
+  }
+}
+function pzPintarFondo() {
+  if (!pzImg) return;
+  const S = pzTab.clientWidth, nw = pzImg.naturalWidth, nh = pzImg.naturalHeight;
+  if (!S || !nw) return;
+  const sc = S / Math.min(nw, nh), iw = nw * sc, ih = nh * sc;   // la foto se recorta al centro en un cuadrado
+  const ox = (S - iw) / 2, oy = (S - ih) / 2, t = S / PZ;
+  pzTab.querySelectorAll('.pz-pieza').forEach(p => {
+    const id = +p.dataset.id, r = Math.floor(id / PZ), c = id % PZ;
+    p.style.backgroundImage = 'url("' + pzImg.src + '")';
+    p.style.backgroundSize = iw + 'px ' + ih + 'px';
+    p.style.backgroundPosition = (ox - c * t) + 'px ' + (oy - r * t) + 'px';
+  });
+}
+function pzColocar() {
+  pzTab.querySelectorAll('.pz-pieza').forEach(p => {
+    const pos = pzEstado.indexOf(+p.dataset.id);
+    p.style.left = (pos % PZ) * 100 / PZ + '%';
+    p.style.top = Math.floor(pos / PZ) * 100 / PZ + '%';
+  });
+}
+function pzMezclar() {
+  if (!pzImg) return;
+  do {
+    pzEstado = Array.from({ length: PZ * PZ }, (_, i) => i);
+    let hueco = PZ * PZ - 1, previo = -1;
+    for (let k = 0; k < 150; k++) {            // se mezcla con jugadas válidas: siempre tiene solución
+      const opciones = pzVecinos(hueco).filter(v => v !== previo);
+      const v = opciones[Math.floor(Math.random() * opciones.length)];
+      [pzEstado[hueco], pzEstado[v]] = [pzEstado[v], pzEstado[hueco]];
+      previo = hueco; hueco = v;
+    }
+  } while (pzEstado.every((v, i) => v === i));
+  pzMov = 0; pzListo = false;
+  $('pz-mov').textContent = 0; $('pz-fin').hidden = true; pzTab.classList.remove('listo');
+  pzPintarFondo(); pzColocar();
+}
+function pzTocar(id) {
+  if (pzListo) return;
+  const pos = pzEstado.indexOf(id), h = pzEstado.indexOf(PZ * PZ - 1);
+  if (!pzVecinos(pos).includes(h)) return;
+  [pzEstado[pos], pzEstado[h]] = [pzEstado[h], pzEstado[pos]];
+  $('pz-mov').textContent = ++pzMov;
+  pzColocar();
+  if (pzEstado.every((v, i) => v === i)) {
+    pzListo = true; pzTab.classList.add('listo');
+    $('pz-fin-txt').textContent = 'En ' + pzMov + ' movimientos. ' + (CONFIG.puzzleFin || '');
+    $('pz-fin').hidden = false;
+  }
+}
+function pzCargar() {
+  const src = pzSel.value; if (!src) return;
+  $('pz-mini').src = src;
+  const im = new Image();
+  im.onload = () => { pzImg = im; pzMezclar(); };
+  im.src = src;
+}
+function abrirPuzzle() {
+  if (!pzSel.options.length) {
+    fotosOk().forEach((f, i) => {
+      const o = document.createElement('option');
+      o.value = f.src; o.textContent = f.texto || ('Foto ' + (i + 1));
+      pzSel.appendChild(o);
+    });
+  }
+  pzCrear();
+  $('modal-puzzle').classList.add('visible');
+  pzCargar();
+}
+pzSel.addEventListener('change', pzCargar);
+$('pz-mezclar').addEventListener('click', pzMezclar);
+addEventListener('resize', pzPintarFondo);
+
 /* ---- Hilo, rollo y pergamino ---- */
 const hilo = $('hilo'), aro = $('hilo-aro'), rollo = hilo.querySelector('.rollo'), cuerpo = $('pergamino');
 const ANCHO_CERRADO = 54;
@@ -945,7 +1149,9 @@ addEventListener('keydown', e => { if (e.key === 'Escape') alternarMenu(false); 
 // Lo que aparece en el pergamino: para agregar algo nuevo, suma una línea aquí
 const JUEGOS = [
   { icono: '💖', nombre: 'Atrapa los corazones', desc: 'Atrapa 10 corazones', accion: () => $('btn-juego-abrir').click() },
-  { icono: '👓', nombre: 'Fotomatón', desc: 'Ponle accesorios a nuestras fotos', accion: () => $('btn-foto-abrir').click() }
+  { icono: '👓', nombre: 'Fotomatón', desc: 'Ponle accesorios a nuestras fotos', accion: () => $('btn-foto-abrir').click() },
+  { icono: '🃏', nombre: 'Memorama', desc: 'Encuentra las parejas de fotos', accion: abrirMemo },
+  { icono: '🧩', nombre: 'Rompecabezas', desc: 'Arma una foto deslizando piezas', accion: abrirPuzzle }
 ];
 JUEGOS.forEach(j => {
   const b = document.createElement('button');
