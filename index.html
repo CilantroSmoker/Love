@@ -239,6 +239,12 @@
   .item-menu b { display:block; font-size:.95rem; }
   .item-menu small { font-size:.78rem; opacity:.75; }
 
+  /* Corazón holograma */
+  #holo { position:fixed; right:2vw; top:50%; transform:translateY(-50%); width:clamp(180px,22vw,320px); height:clamp(200px,24vw,350px); z-index:0; pointer-events:none; filter:drop-shadow(0 0 10px rgba(242,161,181,.45)); }
+  @media (max-width:1000px) {
+    #holo { right:-24px; top:auto; bottom:4vh; transform:none; width:170px; height:190px; opacity:.35; }
+  }
+
   @media (prefers-reduced-motion:reduce) {
     .corazon { animation-duration:.01s; }
     .overlay .contenido, .solapa { transition:none; }
@@ -249,6 +255,7 @@
 </head>
 <body>
 <canvas id="fondo"></canvas>
+<canvas id="holo" aria-hidden="true"></canvas>
 
 <main>
   <h1 id="titulo"></h1>
@@ -483,7 +490,8 @@ const CONFIG = {
     { src: "musica/9.mp3", titulo: "Let You Break My Heart Again - Laufey" },
     { src: "musica/10.mp3", titulo: "Memories Of Heaven - Jang JungWoo" },
     { src: "musica/11.mp3", titulo: "Mrs Magic" },
-    { src: "musica/12.mp3", titulo: "SunKissed Lola - Pasilyo" }
+    { src: "musica/12.mp3", titulo: "SunKissed Lola - Pasilyo" },
+    { src: "musica/13.mp3", titulo: "Pensamientos de magrugada - CilantroSmoker" }
   ],
   hitos: [
     { fecha: "26 de diciembre, 2019", titulo: "El día que empezó todo", desc: "El momento exacto en que nuestras vidas se cruzaron." },
@@ -1319,7 +1327,7 @@ addEventListener('resize', () => { if (menuAbierto) aplicar(1); });
 addEventListener('pointerdown', e => { if (menuAbierto && !hilo.contains(e.target)) alternarMenu(false); });
 addEventListener('keydown', e => { if (e.key === 'Escape') alternarMenu(false); });
 
-/* ---- Menú desplegable del pergamino (AQUÍ FALTABA AGREGAR abrirHab) ---- */
+/* ---- Menú desplegable del pergamino ---- */
 const JUEGOS = [
   { icono: '💖', nombre: 'Atrapa los corazones', desc: 'Atrapa 10 corazones', accion: () => $('btn-juego-abrir').click() },
   { icono: '👓', nombre: 'Fotomatón', desc: 'Ponle accesorios a nuestras fotos', accion: () => $('btn-foto-abrir').click() },
@@ -1335,6 +1343,53 @@ JUEGOS.forEach(j => {
   b.addEventListener('click', () => { alternarMenu(false); setTimeout(j.accion, 250); });
   $('pergamino-lista').appendChild(b);
 });
+
+/* ---- Corazón holograma de puntos ---- */
+const holo = $('holo'), hctx = holo.getContext('2d');
+const HP = [];
+for (let i = 0; i < 1700; i++) {
+  const t = Math.random() * Math.PI * 2;
+  const s = i < 300 ? 1 : Math.sqrt(Math.random());          // 300 puntos marcan el contorno
+  const hx = 16 * Math.pow(Math.sin(t), 3);
+  const hy = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+  const z = (Math.random() < 0.5 ? -1 : 1) * 7 * Math.sqrt(1 - s * s);   // corazón "inflado"
+  HP.push({ x: s * hx, y: -(s * hy) + 2.5, z, oro: Math.random() < 0.12 });
+}
+for (let i = 0; i < 70; i++) {                               // anillo de la base
+  const a = i / 70 * Math.PI * 2;
+  HP.push({ x: Math.cos(a) * 13, y: 21, z: Math.sin(a) * 13, oro: true, base: true });
+}
+
+function dibujarHolo(t) {
+  const dpr = devicePixelRatio || 1;
+  const w = holo.clientWidth, h = holo.clientHeight;
+  if (holo.width !== Math.round(w * dpr)) { holo.width = Math.round(w * dpr); holo.height = Math.round(h * dpr); }
+  hctx.setTransform(1, 0, 0, 1, 0, 0);
+  hctx.clearRect(0, 0, holo.width, holo.height);
+  hctx.scale(dpr, dpr);
+
+  const unit = w / 40, cx = w / 2, cy = h / 2;
+  const ang = reducir ? 0.6 : t / 2600;
+  const cos = Math.cos(ang), sin = Math.sin(ang);
+  const latido = 1 + 0.045 * Math.pow(Math.max(0, Math.sin(t / 380)), 3);
+  const parpadeo = Math.random() < 0.025 ? 0.55 : 1;
+
+  for (const p of HP) {
+    const xr = p.x * cos + p.z * sin;
+    const zr = -p.x * sin + p.z * cos;
+    const k = 60 / (60 + zr);
+    const sx = cx + xr * k * unit * latido;
+    const sy = cy + p.y * k * unit * latido;
+    const frente = 1 - (zr + 13) / 26;                       // 1 = cerca, 0 = lejos
+    const brillo = 0.75 + 0.25 * Math.sin(sy * 0.35 - t / 180);   // líneas de escaneo
+    const alfa = Math.max(0.08, (0.2 + 0.7 * frente) * brillo * parpadeo * (p.base ? 0.6 : 1));
+    const tam = Math.max(1, Math.round(1.4 * k * (0.7 + frente * 0.6)));
+    hctx.fillStyle = p.oro ? 'rgba(244,217,160,' + alfa + ')' : 'rgba(242,161,181,' + alfa + ')';
+    hctx.fillRect(Math.round(sx), Math.round(sy), tam, tam);
+  }
+  requestAnimationFrame(dibujarHolo);
+}
+requestAnimationFrame(dibujarHolo);
 </script>
 </body>
 </html>
