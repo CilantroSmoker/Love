@@ -1914,12 +1914,29 @@ JUEGOS.forEach(j => {
 const holo = $('holo'), hctx = holo.getContext('2d');
 let holoVel = 0, holoUlt = 0, holoExtra = 0;
 
-const CROWD = Array.from({ length: 900 }, (_, i) => {
-  const a = Math.random() * 6.2832;
-  const tier = i < 380 ? Math.floor(Math.random() * 6) : 3 + Math.floor(Math.random() * 7);
-  const r = 12 + tier * 2.4 + Math.random() * 1.6;
-  return { x: Math.cos(a) * r, z: Math.sin(a) * r, r, tier, f: Math.random() * 6.28, sec: Math.floor(a / 6.2832 * 8) };
-});
+/* público ordenado: cancha (apretada) + gradas en filas con pasillos */
+const CROWD = [];
+(function () {
+  const brazos = [0, 1, 2, 3].map(k => { const b = .785 + k * 1.5708; return [Math.cos(b), Math.sin(b)]; });
+  for (let x = -23; x <= 23; x += 1.35) for (let z = -23; z <= 23; z += 1.35) {
+    const jx = x + (Math.random() - .5) * .45, jz = z + (Math.random() - .5) * .45, r = Math.hypot(jx, jz);
+    if (r < 8 || r > 22.6) continue;
+    if (brazos.some(([dx, dz]) => {
+      const al = jx * dx + jz * dz, pe = -jx * dz + jz * dx;
+      return (al > 4 && al < 22 && Math.abs(pe) < 2.1) || Math.hypot(jx - dx * 18.4, jz - dz * 18.4) < 3.8;
+    })) continue;
+    CROWD.push({ x: jx, z: jz, r, h: 0, f: Math.random() * 6.28, u: Math.random(), sec: Math.floor((Math.atan2(jz, jx) + 3.1416) / 6.2832 * 8) % 8 });
+  }
+  for (let fila = 0; fila < 6; fila++) {
+    const r = 24.2 + fila * 1.4, n = Math.floor(6.2832 * r / 1.55), off = fila * .5 / r;
+    for (let i = 0; i < n; i++) {
+      const a = i / n * 6.2832 + off;  // se recalcula abajo
+      const d = ((a % (6.2832 / 12)) + 6.2832 / 12) % (6.2832 / 12);
+      if (d < 1.1 / r || d > 6.2832 / 12 - .1 / r) continue;   // pasillo entre sectores
+      CROWD.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, r, h: (fila + 1) * .9, f: Math.random() * 6.28, u: Math.random(), sec: Math.floor(a / 6.2832 * 8) % 8 });
+    }
+  }
+})();
 /* colores de las army bombs, cambian en olas por sectores */
 const BOMBA = [[140,82,255], [165,110,255], [120,85,245], [140,82,255], [235,225,255], [140,82,255], [242,161,181], [125,100,255]];
 const SIMB = ['♥', '7', '✦', '♥'];
@@ -1948,7 +1965,10 @@ function dibujarHolo(t) {
   /* cámara: vista diagonal desde una grada, mirando hacia abajo */
   const yaw = 0.785 + (reducir ? 0 : Math.sin(t / 3200) * 0.2) + holoExtra, pit = 0.5;
   const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit);
-  const sc = Math.min(w / 52, h / 38), ox = w / 2, oy = h * 0.64;
+  const nn = window.noche || 0;
+  const scD = Math.min(w / 68, h / 34), scC = Math.min(w / 52, h / 38);   // día: se ve todo / concierto: más cerca
+  const oyD = h * .5 + 4.6 * scD, oyC = h * .64;
+  const sc = scD + (scC - scD) * nn, ox = w / 2, oy = oyD + (oyC - oyD) * nn;
   const P = (x, y, z) => {
     const x1 = x * cyw + z * syw, z1 = -x * syw + z * cyw;
     return [ox + x1 * sc, oy - (y * cp - z1 * sp) * sc, y * sp + z1 * cp];
@@ -1981,28 +2001,35 @@ function dibujarHolo(t) {
   g.globalAlpha = e;
 
   /* piso del estadio */
-  poly(ring(0, 0, 26, 0, 48), 'rgba(' + cs + ',' + (.1 + .12 * n) + ')', 'rgba(' + cs + ',.28)', 1);
+  poly(ring(0, 0, 23, 0, 48), 'rgba(' + cs + ',' + (.1 + .12 * n) + ')', 'rgba(' + cs + ',.28)', 1);
+
+  /* gradas: anillos escalonados */
+  for (let fila = 0; fila < 6; fila++) {
+    const r0 = 23.6 + fila * 1.4, y = (fila + 1) * .9;
+    g.beginPath();
+    [r0 + 1.25, r0].forEach(r => { ring(0, 0, r, y, 56).forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); });
+    g.fillStyle = 'rgba(18,10,32,.6)'; g.fill('evenodd');
+    g.strokeStyle = 'rgba(' + cs + ',' + (.1 + .12 * n) + ')'; g.lineWidth = 1; g.stroke();
+  }
 
   /* público con army bombs que cambian de color en olas */
-  const total = Math.floor(380 + 520 * n);
-  for (let ci = 0; ci < total; ci++) {
-    const c = CROWD[ci];
+  for (const c of CROWD) {
+    if (c.u > (c.h ? .35 + .65 * n : .6 + .4 * n)) continue;   // en modo concierto aparece más gente
     const ph = t / 3200 - c.sec * 0.22, j0 = Math.floor(ph), nb = BOMBA.length;
     const fm = suave(ph - j0);   // mezcla gradual entre un color y el siguiente
     const A = BOMBA[((j0 % nb) + nb) % nb], B = BOMBA[(((j0 + 1) % nb) + nb) % nb];
-    const kk = suave(cl(t - cambioT - (c.r - 12) * 90, 0, 1300));   // la onda sale del escenario
+    const kk = suave(cl(t - cambioT - Math.max(0, c.r - 8) * 75, 0, 1300));   // la onda sale del escenario
     const sv = .5 + .5 * Math.sin(t / 2600 + c.sec * .7);
     const flash = 4 * kk * (1 - kk) * .55;                                  // destello al cambiar de color
     const colS = mezclaRGB(mezclaRGB(colPrev, colNew, kk), [255, 255, 255], Math.min(.8, sv * .25 + flash));
     const col = mezclaRGB(A.map((v, k) => v + (B[k] - v) * fm), colS, n).join(',');
     const a = Math.min(1, (.6 + .3 * Math.sin(t / 900 + c.f)) * (1 + .35 * n));
-    const cuerpo = P(c.x, .5 + c.tier * .8, c.z), luz = P(c.x, 1.6 + c.tier * .8, c.z);
-    g.fillStyle = 'rgba(27,16,38,.55)';
-    g.beginPath(); g.arc(cuerpo[0], cuerpo[1], Math.max(1.5, sc * .22), 0, 6.2832); g.fill();
+    const cuerpo = P(c.x, .5 + c.h, c.z), luz = P(c.x, 1.6 + c.h, c.z);
+    if (!c.h) { g.fillStyle = 'rgba(27,16,38,.55)'; g.beginPath(); g.arc(cuerpo[0], cuerpo[1], Math.max(1.1, sc * .22), 0, 6.2832); g.fill(); }
     g.fillStyle = 'rgba(' + col + ',' + a * (.28 + .2 * n) + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], Math.max(4, sc * .55) * (1 + .9 * n), 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(luz[0], luz[1], Math.max(2.5, sc * .55) * (1 + .9 * n), 0, 6.2832); g.fill();
     g.fillStyle = 'rgba(' + col + ',' + a + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], Math.max(1.7, sc * .2), 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(luz[0], luz[1], Math.max(1.2, sc * .2), 0, 6.2832); g.fill();
   }
 
   /* 4 pasarelas hacia las esquinas, con escenarios B al final */
@@ -2046,16 +2073,12 @@ function dibujarHolo(t) {
   const items = [];
 
   items.push({ z: P(0, 2, 0)[2], draw() {
-    const C = [[-2, -2], [2, -2], [2, 2], [-2, 2]], E = [[-3, -3], [3, -3], [3, 3], [-3, 3]];
-    const f = [];
-    for (let i = 0; i < 4; i++) {
-      const a = C[i], c = C[(i + 1) % 4], ea = E[i], ec = E[(i + 1) % 4];
-      const q = [P(a[0], .7, a[1]), P(c[0], .7, c[1]), P(c[0], 1.9, c[1]), P(a[0], 1.9, a[1])];
-      f.push({ z: (q[0][2] + q[1][2]) / 2, pts: q, fill: i % 2 ? '#34194d' : '#3f2060', st: 'rgba(' + pal.ac2 + ',.5)' });
-      const t3 = [P(ea[0], 1.9, ea[1]), P(ec[0], 1.9, ec[1]), P(0, 3.6, 0)];
-      f.push({ z: (t3[0][2] + t3[1][2] + t3[2][2]) / 3 + 0.5, pts: t3, fill: i % 2 ? '#7a2f66' : '#8c3a76', st: 'rgba(' + pal.ac2 + ',.7)' });
-    }
-    f.sort((m, n) => m.z - n.z).forEach(o => poly(o.pts, o.fill, o.st, 1));
+    const capas = [
+      [2.2, .7, '#3a1d56'], [2.2, .95, '#3f2060'], [2.2, 1.2, '#3a1d56'], [2.2, 1.45, '#3f2060'], [2.2, 1.7, '#3a1d56'],
+      [3.4, 1.9, '#6e2a5c'], [3.4, 2.05, '#7a2f66'],
+      [2.8, 2.25, '#8c3a76'], [2.2, 2.42, '#98437f'], [1.5, 2.57, '#a64d88'], [.8, 2.68, '#b85a95']
+    ];
+    capas.forEach(([r, y, c], i) => poly(ring(0, 0, r, y, 32), c, i === 6 || i === capas.length - 1 ? 'rgba(' + pal.ac2 + ',.8)' : null, 1));
   } });
 
   for (let i = 0; i < 4; i++) {
