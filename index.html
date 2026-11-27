@@ -1914,13 +1914,26 @@ JUEGOS.forEach(j => {
 const holo = $('holo'), hctx = holo.getContext('2d');
 let holoVel = 0, holoUlt = 0, holoExtra = 0;
 
-const CROWD = Array.from({ length: 260 }, () => {
-  const a = Math.random() * 6.2832, r = 12 + Math.random() * 13;
-  return { x: Math.cos(a) * r, z: Math.sin(a) * r, f: Math.random() * 6.28, sec: Math.floor(a / 6.2832 * 8) };
+const CROWD = Array.from({ length: 900 }, (_, i) => {
+  const a = Math.random() * 6.2832;
+  const tier = i < 380 ? Math.floor(Math.random() * 6) : 3 + Math.floor(Math.random() * 7);
+  const r = 12 + tier * 2.4 + Math.random() * 1.6;
+  return { x: Math.cos(a) * r, z: Math.sin(a) * r, r, tier, f: Math.random() * 6.28, sec: Math.floor(a / 6.2832 * 8) };
 });
 /* colores de las army bombs, cambian en olas por sectores */
-const BOMBA = [[140,82,255], [242,161,181], [255,255,255], [127,208,200], [244,217,160], [106,160,255]];
+const BOMBA = [[140,82,255], [165,110,255], [120,85,245], [140,82,255], [235,225,255], [140,82,255], [242,161,181], [125,100,255]];
 const SIMB = ['♥', '7', '✦', '♥'];
+
+/* color de las army bombs según la canción que suena (campo "color" en CONFIG.musica) */
+let colPrev = [140, 82, 255], colNew = [140, 82, 255], cambioT = -99999, idxPrev = -1;
+const hexRGB = h => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return [140, 82, 255]; const v = parseInt(m[1], 16); return [v >> 16, (v >> 8) & 255, v & 255]; };
+const mezclaRGB = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
+
+function colorBomba(ph) {
+  const nb = BOMBA.length, j = Math.floor(ph), fm = suave(ph - j);
+  const A = BOMBA[((j % nb) + nb) % nb], B = BOMBA[(((j + 1) % nb) + nb) % nb];
+  return A.map((v, k) => Math.round(v + (B[k] - v) * fm));
+}
 
 function dibujarHolo(t) {
   const dpr = devicePixelRatio || 1, w = holo.clientWidth, h = holo.clientHeight, g = hctx;
@@ -1950,25 +1963,46 @@ function dibujarHolo(t) {
   });
 
   const e = reducir ? 1 : suave(cl(t, 400, 2600));   // el escenario "se arma" al cargar
+  /* modo concierto: la luz del escenario toma el color de las army bombs */
+  const n = window.noche || 0;
+  const ph0 = t / 3200, i0 = Math.floor(ph0), f0 = suave(ph0 - i0), nB = BOMBA.length;
+  const A0 = BOMBA[i0 % nB], B0 = BOMBA[(i0 + 1) % nB];
+  const cancion = (typeof sirve !== 'undefined' && sirve[idx]) || null;
+  const objetivo = hexRGB(cancion && cancion.color);
+  if (idx !== idxPrev) {                       // cambió la canción
+    const k0 = suave(cl(t - cambioT, 0, 1200));
+    colPrev = mezclaRGB(colPrev, colNew, k0);  // desde el color que se veía en ese momento
+    colNew = objetivo; cambioT = t; idxPrev = idx;
+  }
+  const song = mezclaRGB(colPrev, colNew, suave(cl(t - cambioT, 0, 1200)));
+  const bc = mezclaRGB(A0.map((v, k) => v + (B0[k] - v) * f0), song, n);
+  const pc = pal.ac.split(',').map(Number);
+  const cs = pc.map((v, k) => Math.round(v + (bc[k] - v) * n)).join(',');
   g.globalAlpha = e;
 
   /* piso del estadio */
-  poly(ring(0, 0, 26, 0, 48), 'rgba(' + pal.ac + ',.10)', 'rgba(' + pal.ac + ',.28)', 1);
+  poly(ring(0, 0, 26, 0, 48), 'rgba(' + cs + ',' + (.1 + .12 * n) + ')', 'rgba(' + cs + ',.28)', 1);
 
   /* público con army bombs que cambian de color en olas */
-  for (const c of CROWD) {
-    const ph = t / 3200 - c.sec * 0.22, i0 = Math.floor(ph), n = BOMBA.length;
-    const f = suave(ph - i0);   // mezcla gradual entre un color y el siguiente
-    const A = BOMBA[((i0 % n) + n) % n], B = BOMBA[(((i0 + 1) % n) + n) % n];
-    const col = A.map((v, k) => Math.round(v + (B[k] - v) * f)).join(',');
-    const a = .6 + .3 * Math.sin(t / 900 + c.f);
-    const cuerpo = P(c.x, .5, c.z), luz = P(c.x, 1.6, c.z);
+  const total = Math.floor(380 + 520 * n);
+  for (let ci = 0; ci < total; ci++) {
+    const c = CROWD[ci];
+    const ph = t / 3200 - c.sec * 0.22, j0 = Math.floor(ph), nb = BOMBA.length;
+    const fm = suave(ph - j0);   // mezcla gradual entre un color y el siguiente
+    const A = BOMBA[((j0 % nb) + nb) % nb], B = BOMBA[(((j0 + 1) % nb) + nb) % nb];
+    const kk = suave(cl(t - cambioT - (c.r - 12) * 90, 0, 1300));   // la onda sale del escenario
+    const sv = .5 + .5 * Math.sin(t / 2600 + c.sec * .7);
+    const flash = 4 * kk * (1 - kk) * .55;                                  // destello al cambiar de color
+    const colS = mezclaRGB(mezclaRGB(colPrev, colNew, kk), [255, 255, 255], Math.min(.8, sv * .25 + flash));
+    const col = mezclaRGB(A.map((v, k) => v + (B[k] - v) * fm), colS, n).join(',');
+    const a = Math.min(1, (.6 + .3 * Math.sin(t / 900 + c.f)) * (1 + .35 * n));
+    const cuerpo = P(c.x, .5 + c.tier * .8, c.z), luz = P(c.x, 1.6 + c.tier * .8, c.z);
     g.fillStyle = 'rgba(27,16,38,.55)';
-    g.beginPath(); g.arc(cuerpo[0], cuerpo[1], 1.5, 0, 6.2832); g.fill();
-    g.fillStyle = 'rgba(' + col + ',' + a * .28 + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], 4, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(cuerpo[0], cuerpo[1], Math.max(1.5, sc * .22), 0, 6.2832); g.fill();
+    g.fillStyle = 'rgba(' + col + ',' + a * (.28 + .2 * n) + ')';
+    g.beginPath(); g.arc(luz[0], luz[1], Math.max(4, sc * .55) * (1 + .9 * n), 0, 6.2832); g.fill();
     g.fillStyle = 'rgba(' + col + ',' + a + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], 1.7, 0, 6.2832); g.fill();
+    g.beginPath(); g.arc(luz[0], luz[1], Math.max(1.7, sc * .2), 0, 6.2832); g.fill();
   }
 
   /* 4 pasarelas hacia las esquinas, con escenarios B al final */
@@ -1976,13 +2010,37 @@ function dibujarHolo(t) {
   for (let k = 0; k < 4; k++) {
     const b = 0.785 + k * 1.5708, dx = Math.cos(b), dz = Math.sin(b), px = -dz, pz = dx;
     const rect = (y) => [[5.5, -1.2], [17, -1.2], [17, 1.2], [5.5, 1.2]].map(([r, q]) => P(dx * r + px * q, y, dz * r + pz * q));
-    [0, .2, .4].forEach((y, i) => poly(rect(y), tono[i], i === 2 ? 'rgba(' + pal.ac + ',.55)' : null, 1));
-    [0, .2, .4].forEach((y, i) => poly(ring(dx * 18.4, dz * 18.4, 2.8, y, 20), tono[i], i === 2 ? 'rgba(' + pal.ac + ',.7)' : null, 1));
+    [0, .2, .4].forEach((y, i) => poly(rect(y), tono[i], i === 2 ? 'rgba(' + cs + ',.55)' : null, 1));
+    [0, .2, .4].forEach((y, i) => poly(ring(dx * 18.4, dz * 18.4, 2.8, y, 20), tono[i], i === 2 ? 'rgba(' + cs + ',.7)' : null, 1));
   }
 
   /* plataforma central */
   [0, .25, .5, .7].forEach((y, i) => poly(ring(0, 0, 6.5, y, 36), ['#1d0f2b', '#2a1640', '#3a1d56', '#4a2570'][i], i === 3 ? 'rgba(' + pal.ac2 + ',.9)' : null, 1.2));
-  poly(ring(0, 0, 4.2, .7, 30), null, 'rgba(' + pal.ac + ',.5)', 1);
+  poly(ring(0, 0, 4.2, .7, 30), null, 'rgba(' + cs + ',.5)', 1);
+
+  /* resplandor blanco del escenario (como se veía desde la grada) */
+  if (n > 0.02) {
+    g.save(); g.globalCompositeOperation = 'lighter';
+    poly(ring(0, 0, 9, .7, 30), 'rgba(225,220,255,' + (.14 * n) + ')');
+    for (let k = 0; k < 4; k++) {
+      const b = 0.785 + k * 1.5708, dx = Math.cos(b), dz = Math.sin(b), px = -dz, pz = dx;
+      poly([[5, -.5], [17, -.5], [17, .5], [5, .5]].map(([r, q]) => P(dx * r + px * q, .5, dz * r + pz * q)), 'rgba(225,220,255,' + (.16 * n) + ')');
+    }
+    g.restore();
+  }
+
+  /* haces de luz al cielo (solo en modo concierto) */
+  if (n > 0.02) {
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 7; k++) {
+      const a = k * 0.8976 + t / 5000 * (k % 2 ? 1 : -1), d = 10 + Math.sin(t / 1800 + k) * 3;
+      const px = -Math.sin(a), pz = Math.cos(a);
+      poly([P(px * .8, .7, pz * .8), P(-px * .8, .7, -pz * .8),
+            P(Math.cos(a) * d - px * 2.4, 28, Math.sin(a) * d - pz * 2.4), P(Math.cos(a) * d + px * 2.4, 28, Math.sin(a) * d + pz * 2.4)],
+           'rgba(' + bc.join(',') + ',' + (.16 * n) + ')');
+    }
+    g.restore();
+  }
 
   /* pabellón central (inspirado en Gyeonghoeru) + 4 pantallas */
   const items = [];
@@ -2023,6 +2081,7 @@ function dibujarHolo(t) {
       const gr = g.createLinearGradient(0, 0, 160, 90);
       gr.addColorStop(0, '#2a1060'); gr.addColorStop(.55, '#8c52ff'); gr.addColorStop(1, '#f2a1b5');
       g.fillStyle = gr; g.fillRect(0, 0, 160, 90);
+      g.fillStyle = 'rgba(' + bc.join(',') + ',' + (.38 * n) + ')'; g.fillRect(0, 0, 160, 90);
       const bx = ((t / 18 + i * 55) % 240) - 40;
       g.fillStyle = 'rgba(255,255,255,.18)';
       g.beginPath(); g.moveTo(bx, 0); g.lineTo(bx + 24, 0); g.lineTo(bx + 4, 90); g.lineTo(bx - 20, 90); g.fill();
@@ -2037,6 +2096,27 @@ function dibujarHolo(t) {
     } });
   }
   items.sort((a, b) => a.z - b.z).forEach(o => o.draw());
+
+  /* primer plano: siluetas del público con bombas grandes */
+  if (n > 0.05) {
+    g.save(); g.globalAlpha = n;
+    const R = Math.max(10, Math.min(w, h) * .045);
+    for (let k = 0; k < 6; k++) {
+      const x = w * (.08 + k * .17) + Math.sin(t / 1700 + k * 2) * 4;
+      const y = h * (.93 + (k % 2) * .05) + Math.sin(t / 1300 + k) * 3;
+      const cc = mezclaRGB(song, [255, 255, 255], .12 + .12 * Math.sin(t / 1500 + k)).join(',');
+      const ox2 = x + R * 1.5, oy2 = y - R * 1.9;
+      const gr = g.createRadialGradient(ox2, oy2, 0, ox2, oy2, R * 2.3);
+      gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.22, 'rgba(' + cc + ',.95)'); gr.addColorStop(1, 'rgba(' + cc + ',0)');
+      g.fillStyle = gr; g.beginPath(); g.arc(ox2, oy2, R * 2.3, 0, 6.2832); g.fill();
+      g.fillStyle = '#05030a';
+      g.beginPath(); g.ellipse(x, y + R * 1.7, R * 1.8, R * 1.7, 0, Math.PI, 0); g.fill();
+      g.beginPath(); g.arc(x, y - R * .5, R * .75, 0, 6.2832); g.fill();
+      g.strokeStyle = '#05030a'; g.lineWidth = R * .5; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(x + R * .8, y + R * .3); g.lineTo(ox2 - R * .3, oy2 + R * .5); g.stroke();
+    }
+    g.restore();
+  }
 
   g.globalAlpha = 1;
   requestAnimationFrame(dibujarHolo);
