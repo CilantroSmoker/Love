@@ -1304,7 +1304,7 @@ lista.forEach(f => {
 
 /* ---- Fondo vivo: pétalos, luz y diente de león que crece con el scroll ---- */
 const cv = $('fondo'), ctx = cv.getContext('2d');
-let W, H, particulas = [], nodosConstelacion = [];
+let W, H, particulas = [], nodosConstelacion = [], ESTRELLAS = [];
 let viento = 0, ultY = 0, progScroll = 0;
 const reducir = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1320,6 +1320,9 @@ function ajustar() {
   particulas = Array.from({ length: n }, () => nueva(true));
   nodosConstelacion = FORMA_7.map(([fx, fy], idx) => ({
     bx: fx * W, by: fy * H, fase: idx * 0.9
+  }));
+  ESTRELLAS = Array.from({ length: W < 640 ? 110 : 200 }, () => ({
+    x: Math.random() * W, y: Math.random() * H, r: .4 + Math.random() * 1.2, f: Math.random() * 6.28
   }));
 }
 function nueva(inicial) {
@@ -1468,8 +1471,18 @@ function dibujarDiente(t) {
   ctx.restore();
 }
 
+let fondoPrev = 0;
+const MOVIL_F = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || innerWidth < 700;
+
 function dibujar(t) {
+  if (MOVIL_F && !reducir && t - fondoPrev < 28) { requestAnimationFrame(dibujar); return; }   // 30 fps en celular
+  fondoPrev = t;
   ctx.clearRect(0, 0, W, H);
+  const noche = window.noche || 0;
+  if (noche > 0.01) for (const s of ESTRELLAS) {
+    ctx.fillStyle = 'rgba(255,255,255,' + (noche * (.25 + .65 * Math.abs(Math.sin(t / 1100 + s.f)))) + ')';
+    ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.28); ctx.fill();
+  }
   viento *= 0.94;
   const derivaScroll = (progScroll - 0.5) * 32;
 
@@ -1505,9 +1518,9 @@ function dibujar(t) {
     ctx.restore();
   }
 
-  dibujarDiente(t);
+  if (noche < .5) dibujarDiente(t);
 
-  for (const p of particulas) {
+  if (noche < .5) for (const p of particulas) {   // en modo concierto no hacen falta los pétalos
     p.y += p.vy * (1 + viento * p.capa);
     p.x += p.vx + Math.sin(t / 1500 + p.fase) * 0.3 * p.capa + viento * 0.35 * p.capa;
     p.ang += p.giro;
@@ -1916,9 +1929,11 @@ let holoVel = 0, holoUlt = 0, holoExtra = 0;
 
 /* público ordenado: cancha (apretada) + gradas en filas con pasillos */
 const CROWD = [];
+const MOVIL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || innerWidth < 700;
 (function () {
+  const paso = MOVIL ? 1.8 : 1.35, sep = MOVIL ? 2.1 : 1.55;
   const brazos = [0, 1, 2, 3].map(k => { const b = .785 + k * 1.5708; return [Math.cos(b), Math.sin(b)]; });
-  for (let x = -23; x <= 23; x += 1.35) for (let z = -23; z <= 23; z += 1.35) {
+  for (let x = -23; x <= 23; x += paso) for (let z = -23; z <= 23; z += paso) {
     const jx = x + (Math.random() - .5) * .45, jz = z + (Math.random() - .5) * .45, r = Math.hypot(jx, jz);
     if (r < 8 || r > 22.6) continue;
     if (brazos.some(([dx, dz]) => {
@@ -1928,7 +1943,7 @@ const CROWD = [];
     CROWD.push({ x: jx, z: jz, r, h: 0, f: Math.random() * 6.28, u: Math.random(), sec: Math.floor((Math.atan2(jz, jx) + 3.1416) / 6.2832 * 8) % 8 });
   }
   for (let fila = 0; fila < 6; fila++) {
-    const r = 24.2 + fila * 1.4, n = Math.floor(6.2832 * r / 1.55), off = fila * .5 / r;
+    const r = 24.2 + fila * 1.4, n = Math.floor(6.2832 * r / sep), off = fila * .5 / r;
     for (let i = 0; i < n; i++) {
       const a = i / n * 6.2832 + off;  // se recalcula abajo
       const d = ((a % (6.2832 / 12)) + 6.2832 / 12) % (6.2832 / 12);
@@ -1936,6 +1951,7 @@ const CROWD = [];
       CROWD.push({ x: Math.cos(a) * r, z: Math.sin(a) * r, r, h: (fila + 1) * .9, f: Math.random() * 6.28, u: Math.random(), sec: Math.floor(a / 6.2832 * 8) % 8 });
     }
   }
+  CROWD.forEach(c => { c.sb = c.sec * 12 + Math.min(11, Math.max(0, Math.floor((c.r - 8) / 2))); });
 })();
 /* colores de las army bombs, cambian en olas por sectores */
 const BOMBA = [[140,82,255], [165,110,255], [120,85,245], [140,82,255], [235,225,255], [140,82,255], [242,161,181], [125,100,255]];
@@ -1946,6 +1962,26 @@ let colPrev = [140, 82, 255], colNew = [140, 82, 255], cambioT = -99999, idxPrev
 const hexRGB = h => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return [140, 82, 255]; const v = parseInt(m[1], 16); return [v >> 16, (v >> 8) & 255, v & 255]; };
 const mezclaRGB = (a, b, k) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
 
+/* sprites precalculados de cada luz (una imagen por color, en vez de dibujar círculos) */
+const SPR = new Map();
+function sprite(r, gg, b) {
+  const q = v => Math.min(255, Math.round(v / 12) * 12);
+  const key = q(r) + ',' + q(gg) + ',' + q(b);
+  let sp = SPR.get(key);
+  if (!sp) {
+    if (SPR.size > 300) SPR.clear();
+    sp = document.createElement('canvas'); sp.width = sp.height = 32;
+    const x = sp.getContext('2d'), gr = x.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gr.addColorStop(0, 'rgba(' + key + ',1)'); gr.addColorStop(.2, 'rgba(' + key + ',1)');
+    gr.addColorStop(.26, 'rgba(' + key + ',.4)'); gr.addColorStop(1, 'rgba(' + key + ',0)');
+    x.fillStyle = gr; x.fillRect(0, 0, 32, 32); SPR.set(key, sp);
+  }
+  return sp;
+}
+const SPRITES = new Array(96), PX = new Float32Array(1500), PY = new Float32Array(1500), PA = new Float32Array(1500), PS = new Uint8Array(1500);
+let holoVisible = true, holoPrevDraw = 0;
+if ('IntersectionObserver' in window) new IntersectionObserver(es => { holoVisible = es[0].isIntersecting; }, { threshold: 0 }).observe(holo);
+
 function colorBomba(ph) {
   const nb = BOMBA.length, j = Math.floor(ph), fm = suave(ph - j);
   const A = BOMBA[((j % nb) + nb) % nb], B = BOMBA[(((j + 1) % nb) + nb) % nb];
@@ -1953,7 +1989,10 @@ function colorBomba(ph) {
 }
 
 function dibujarHolo(t) {
-  const dpr = devicePixelRatio || 1, w = holo.clientWidth, h = holo.clientHeight, g = hctx;
+  /* ahorro: no dibujar si no se ve, y a 30 fps en celular */
+  if (!holoVisible || (MOVIL && t - holoPrevDraw < 28)) { requestAnimationFrame(dibujarHolo); return; }
+  holoPrevDraw = t;
+  const dpr = Math.min(devicePixelRatio || 1, 1.5), w = holo.clientWidth, h = holo.clientHeight, g = hctx;
   if (holo.width !== Math.round(w * dpr)) { holo.width = Math.round(w * dpr); holo.height = Math.round(h * dpr); }
   g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, holo.width, holo.height); g.scale(dpr, dpr);
 
@@ -2012,25 +2051,37 @@ function dibujarHolo(t) {
     g.strokeStyle = 'rgba(' + cs + ',' + (.1 + .12 * n) + ')'; g.lineWidth = 1; g.stroke();
   }
 
-  /* público con army bombs que cambian de color en olas */
+  /* público con army bombs: un color por sector y anillo, sprites en caché */
+  for (let sec = 0; sec < 8; sec++) {
+    const ph = t / 3200 - sec * 0.22, j0 = Math.floor(ph), nb = BOMBA.length, fm = suave(ph - j0);
+    const A = BOMBA[((j0 % nb) + nb) % nb], B = BOMBA[(((j0 + 1) % nb) + nb) % nb];
+    const wave = A.map((v, k) => v + (B[k] - v) * fm);
+    const sv = .5 + .5 * Math.sin(t / 2600 + sec * .7);
+    for (let rb = 0; rb < 12; rb++) {
+      const kk = suave(cl(t - cambioT - Math.max(0, 9 + rb * 2 - 8) * 75, 0, 1300));   // onda desde el escenario
+      const flash = 4 * kk * (1 - kk) * .55;
+      const colS = mezclaRGB(mezclaRGB(colPrev, colNew, kk), [255, 255, 255], Math.min(.8, sv * .25 + flash));
+      const col = mezclaRGB(wave, colS, n);
+      SPRITES[sec * 12 + rb] = sprite(col[0], col[1], col[2]);
+    }
+  }
+  const rb0 = Math.max(1.1, sc * .22), Rh = Math.max(2.5, sc * .55) * (1 + .9 * n);
+  g.fillStyle = 'rgba(27,16,38,.55)';
+  let m = 0;
   for (const c of CROWD) {
     if (c.u > (c.h ? .35 + .65 * n : .6 + .4 * n)) continue;   // en modo concierto aparece más gente
-    const ph = t / 3200 - c.sec * 0.22, j0 = Math.floor(ph), nb = BOMBA.length;
-    const fm = suave(ph - j0);   // mezcla gradual entre un color y el siguiente
-    const A = BOMBA[((j0 % nb) + nb) % nb], B = BOMBA[(((j0 + 1) % nb) + nb) % nb];
-    const kk = suave(cl(t - cambioT - Math.max(0, c.r - 8) * 75, 0, 1300));   // la onda sale del escenario
-    const sv = .5 + .5 * Math.sin(t / 2600 + c.sec * .7);
-    const flash = 4 * kk * (1 - kk) * .55;                                  // destello al cambiar de color
-    const colS = mezclaRGB(mezclaRGB(colPrev, colNew, kk), [255, 255, 255], Math.min(.8, sv * .25 + flash));
-    const col = mezclaRGB(A.map((v, k) => v + (B[k] - v) * fm), colS, n).join(',');
-    const a = Math.min(1, (.6 + .3 * Math.sin(t / 900 + c.f)) * (1 + .35 * n));
-    const cuerpo = P(c.x, .5 + c.h, c.z), luz = P(c.x, 1.6 + c.h, c.z);
-    if (!c.h) { g.fillStyle = 'rgba(27,16,38,.55)'; g.beginPath(); g.arc(cuerpo[0], cuerpo[1], Math.max(1.1, sc * .22), 0, 6.2832); g.fill(); }
-    g.fillStyle = 'rgba(' + col + ',' + a * (.28 + .2 * n) + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], Math.max(2.5, sc * .55) * (1 + .9 * n), 0, 6.2832); g.fill();
-    g.fillStyle = 'rgba(' + col + ',' + a + ')';
-    g.beginPath(); g.arc(luz[0], luz[1], Math.max(1.2, sc * .2), 0, 6.2832); g.fill();
+    const z1 = -c.x * syw + c.z * cyw, sx = ox + (c.x * cyw + c.z * syw) * sc;
+    const syL = oy - ((1.6 + c.h) * cp - z1 * sp) * sc;
+    if (sx < -20 || sx > w + 20 || syL < -20 || syL > h + 20) continue;   // fuera de pantalla: no se dibuja
+    if (!c.h) { const syB = oy - ((.5 + c.h) * cp - z1 * sp) * sc; g.fillRect(sx - rb0, syB - rb0, rb0 * 2, rb0 * 2); }
+    PX[m] = sx; PY[m] = syL; PS[m] = c.sb;
+    PA[m] = Math.min(1, (.6 + .3 * Math.sin(t / 900 + c.f)) * (1 + .35 * n)); m++;
   }
+  for (let i = 0; i < m; i++) {
+    g.globalAlpha = e * PA[i];
+    g.drawImage(SPRITES[PS[i]], PX[i] - Rh, PY[i] - Rh, Rh * 2, Rh * 2);
+  }
+  g.globalAlpha = e;
 
   /* 4 pasarelas hacia las esquinas, con escenarios B al final */
   const tono = ['#1d0f2b', '#2a1640', '#3a1d56'];
